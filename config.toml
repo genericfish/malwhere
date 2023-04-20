@@ -1,0 +1,23 @@
+[binary]
+# Path to store user uploaded binaries
+path = "./files"
+
+[ghidra]
+# Path to the Ghidra headlessAnalyze script
+path = "C:\\Users\\Brandon\\Documents\\Sandbox\\ghidra_10.2.3_PUBLIC"
+
+[ghidra.script]
+# Filename of the script to run
+file = "CleanIO.py"
+
+# Path to scripts directory
+path = "./scripts"
+
+
+# Ghidra settings for headlessAnalyze
+[ghidra.project]
+# Name of project
+name = "malwhere"
+
+# Path to the project path used by Ghidra
+path = "./ghidra"
