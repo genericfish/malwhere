@@ -49,11 +49,17 @@
             gap: 2rem;
         }
 
-        #program {
+        nav {
             margin: 0;
             margin: 1rem 0 1rem 0;
             line-height: 2rem;
             font-size: 2rem;
+
+            max-height: 4rem;
+        }
+
+        nav > div {
+            display: inline;
         }
 
         #function-tree {
@@ -66,6 +72,10 @@
             border: 1px solid white;
             margin: 0;
             padding: 1.25rem;
+        }
+
+        a {
+            color: cadetblue;
         }
 
         #function-tree > li {
@@ -95,7 +105,10 @@
     </style>
 </head>
 <body>
-    <h1 id="program">{{ submission_id }}</h1>
+    <nav>
+        <div id="logo"><a href="/">malwhere</a></div>
+        <div id="program">analyze: {{ submission_id }}</div>
+    </nav>
     <div class="container">
         <ul id="function-tree">
         {% for fname, data in functions.items() %}
