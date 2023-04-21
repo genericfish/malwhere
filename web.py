@@ -4,6 +4,8 @@ import hashlib
 import flask
 import json
 import subprocess
+import base64
+
 from pathlib import Path
 from functools import partial
 from flask import Flask, request, redirect, render_template, url_for
@@ -78,7 +80,7 @@ def upload():
         return flash("Invalid file type")
 
     # Create 256-bit SHA3 hash of the uploaded binary
-    binary_hash = hashlib.sha3_256(binary_bytes).hexdigest()
+    binary_hash = base64.urlsafe_b64encode(hashlib.sha3_256(binary_bytes).digest()).decode('ascii')[:12]
 
     # Save binary file
     path = binary_path(binary_hash).absolute()
@@ -103,7 +105,6 @@ def analysis(submission_id):
         functions = json.load(data)
 
     return render_template("analysis.html", submission_id=submission_id, functions=functions)
-
 
 
 def analyze_binary(abs_path_to_binary):
