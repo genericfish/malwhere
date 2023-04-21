@@ -41,6 +41,9 @@
             {% if 'max_address' in token %}
             data-max-address="{{ token['max_address'] }}"
             {% endif %}
+            {% if 'var_address' in token %}
+            data-var-address="{{ token['var_address'] }}"
+            {% endif %}
         >{{ token["value"] }}</span>
         {% endif %}
         {% endfor %}
@@ -57,15 +60,29 @@
         document.body.appendChild(popup)
 
         for (let token of tokens) {
-            if (token.hasAttribute("data-min-address"))
-                token.addEventListener("mouseover", event => {
-                    popup.style.display = null
-                    popup.innerText = `min-addr: 0x${token.getAttribute("data-min-address")}\nmax-addr: 0x${token.getAttribute("data-max-address")}`
-                    bbox = popup.getBoundingClientRect()
-                    popup.style.top = `${event.clientY - bbox.height}px`
-                    popup.style.left = `${event.clientX}px`
-                })
-                token.addEventListener("mouseleave", _ => popup.style.display = "none")
+            token.addEventListener("mouseover", event => {
+                text = ""
+
+                if (token.hasAttribute("data-min-address"))
+                text += `min-addr: 0x${token.getAttribute("data-min-address")}`
+
+                if (token.hasAttribute("data-max-address"))
+                text += `\nmax-addr: 0x${token.getAttribute("data-max-address")}`
+
+                if (token.hasAttribute("data-var-address"))
+                text += `\nvar-addr: 0x${token.getAttribute("data-var-address")}`
+
+                if (text.length == 0)
+                    return
+
+                popup.style.display = null
+                popup.innerText = text
+
+                bbox = popup.getBoundingClientRect()
+                popup.style.top = `${event.clientY - bbox.height}px`
+                popup.style.left = `${event.clientX}px`
+            })
+            token.addEventListener("mouseleave", _ => popup.style.display = "none")
         }
     </script>
 </body>

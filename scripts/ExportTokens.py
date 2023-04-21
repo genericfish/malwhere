@@ -35,6 +35,15 @@ class ASTNode(object):
         if max_address:
             self.max_address = str(max_address)
 
+        if type(clang_token) == ClangVariableToken:
+            high = clang_token.getHighVariable()
+
+            if high:
+                high_symbol = high.getSymbol()
+
+                if high_symbol:
+                    self.var_address = str(high_symbol.getPCAddress())
+
         if isinstance(clang_token, ClangToken):
             pcode = clang_token.getPcodeOp()
 
