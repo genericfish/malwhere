@@ -44,39 +44,96 @@
             color: grey;
         }
 
+        .container {
+            display: flex;
+            gap: 2rem;
+        }
+
+        #program {
+            margin: 0;
+            margin: 1rem 0 1rem 0;
+            line-height: 2rem;
+            font-size: 2rem;
+        }
+
+        #function-tree {
+            max-width: 250px;
+            max-height: calc(100vh - 8rem);
+            overflow: auto;
+            list-style-type: none;
+            line-height: 1.25rem;
+
+            border: 1px solid white;
+            margin: 0;
+            padding: 1.25rem;
+        }
+
+        #function-tree > li {
+            color: cornflowerblue;
+            cursor: pointer;
+        }
+
+        #function-tree > li:hover {
+            color: lightblue;
+        }
+        
+
+        .function {
+            width: 80vw;
+            height: 100%;
+            max-height: calc(100vh - 8rem);
+            overflow: auto;
+
+            border: 1px solid white;
+        }
+
+        .function > .info > .name {
+            font-size: 2rem;
+            display: block;
+            word-wrap: break-word;
+        }
     </style>
 </head>
 <body>
-    <h1>{{ submission_id }}</h1>
-    {% for fname, data in functions.items() %}
-    <div id="{{ fname }}" class="function">
-        <div class="info">
-            <span class="name">{{ data["simpleName"] }}</span>
-            <span class="address">{{ data["entry"] }}</span>
-        </div>
-        {% for token in data["tokens"] %}
-        {% if token["type"] == "Break" %}
-        <br>
-        {% else %}
-        <span
-            class="token {{ token['type'] }} {% if 'constant' in token %}constant{% endif %}"
-            {% if 'min_address' in token %}
-            data-min-address="{{ token['min_address'] }}"
-            {% endif %}
-            {% if 'max_address' in token %}
-            data-max-address="{{ token['max_address'] }}"
-            {% endif %}
-            {% if 'var_address' in token %}
-            data-var-address="{{ token['var_address'] }}"
-            {% endif %}
-            {% if 'constant' in token %}
-            data-constant="1"
-            {% endif %}
-        >{{ token["value"] }}</span>
-        {% endif %}
+    <h1 id="program">{{ submission_id }}</h1>
+    <div class="container">
+        <ul id="function-tree">
+        {% for fname, data in functions.items() %}
+            <li><span data-func="{{ data['entry'] }}">{{ data["simpleName"] }}</span></li>
         {% endfor %}
+        </ul>
+        <div id="function-code">
+            {% for fname, data in functions.items() %}
+            <div id="{{ data['entry'] }}" class="function" style="display: none;">
+                <div class="info">
+                    <span class="name">Function: {{ data["simpleName"] }}</span>
+                    <span class="address">(entry: {{ data["entry"] }})</span>
+                </div>
+                {% for token in data["tokens"] %}
+                {% if token["type"] == "Break" %}
+                <br>
+                {% else %}
+                <span
+                    class="token {{ token['type'] }} {% if 'constant' in token %}constant{% endif %}"
+                    {% if 'min_address' in token %}
+                    data-min-address="{{ token['min_address'] }}"
+                    {% endif %}
+                    {% if 'max_address' in token %}
+                    data-max-address="{{ token['max_address'] }}"
+                    {% endif %}
+                    {% if 'var_address' in token %}
+                    data-var-address="{{ token['var_address'] }}"
+                    {% endif %}
+                    {% if 'constant' in token %}
+                    data-constant="1"
+                    {% endif %}
+                >{{ token["value"] }}</span>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
     </div>
-    {% endfor %}
 
     <script>
         const functions = document.getElementsByClassName("function")
@@ -88,7 +145,6 @@
         document.body.appendChild(popup)
 
         for (let token of tokens) {
-
             token.addEventListener("mouseover", event => {
                 text = ""
 
@@ -115,7 +171,25 @@
                 popup.style.top = `${bbox.y - pbbox.height}px`
                 popup.style.left = `${Math.max(1, bbox.x - pbbox.width / 2)}px`
             })
+
             token.addEventListener("mouseleave", _ => popup.style.display = "none")
+        }
+
+        const functionTree = document.getElementById("function-tree")
+        let activeFunction = null
+        for (let func of functionTree.children) {
+            const span = func.children[0]
+
+            func.addEventListener("click", _ => {
+                if (activeFunction)
+                    activeFunction.style.display = "none"
+
+                const id = span.getAttribute("data-func")
+                console.log(id)
+
+                activeFunction = document.getElementById(id)
+                activeFunction.style.display = null
+            })
         }
     </script>
 </body>
