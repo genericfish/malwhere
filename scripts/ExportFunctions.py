@@ -6,6 +6,7 @@
 import os
 import re
 import sys
+import json
 
 from ghidra.app.script import GhidraScript
 
@@ -21,6 +22,31 @@ from ghidra.app.decompiler import *
 from ghidra.program.model.listing import VariableFilter
 
 from ghidra.program.model.pcode import *
+
+
+def extract_tokens(node, clang_token_types):
+    # Get tokens from ClangTokenGroup AST matching types in clangTokens
+    valid = any(map(lambda token: isinstance(node, token), clang_token_types))
+
+    if not valid:
+        tokens = []
+
+        for i in range(node.numChildren()):
+            child = node.Child(i)
+            tokens += extract_tokens(child, clang_token_types)
+
+        return tokens
+
+    return [node]
+
+
+def is_no_op_function(node):
+    # Check if a given ClangTokenGroup effectively is a no-op and can be safely ignored
+    # TODO: Figure out more ways a function is effectively useless from AST analysis
+    stmts = extract_tokens(node, [ClangStatement])
+
+    return len(stmts) == 1 and stmts[0].numChildren() == 1
+
 
 def is_empty(node):
     # Check if ClangSyntaxToken is empty string or whitespace
@@ -104,7 +130,7 @@ class Parser(object):
 
 class IOParser(Parser):
     stringTable = None
-
+    __clean = None
 
     def __init__(self, root, skipEmpty=True, prog=None, stringTable=None):
         if sys.version_info[0] <= 2:
@@ -366,23 +392,19 @@ def create_string_table(prog, decompIfc):
 
     return stringTable
 
-
 if __name__ == "__main__":
     prog = FlatProgramAPI(currentProgram, monitor)
     decomp = FlatDecompilerAPI(prog)
+    currentFunction = prog.getFirstFunction()
 
-    def cleanup():
-        currentFunction = prog.getFunctionContaining(currentAddress)
+    decomp.initialize()
+    decompIfc = decomp.getDecompiler()
 
-        if not currentFunction:
-            print("[C3] No function containing current address.")
-            return
+    stringTable = create_string_table(prog, decompIfc)
+    functions = {}
 
+    while currentFunction:
         print("[C3] Cleaning stream operations in {} @ {}".format(currentFunction.getName(), currentFunction.getEntryPoint()))
-        decomp.initialize()
-        decompIfc = decomp.getDecompiler()
-
-        stringTable = create_string_table(prog, decompIfc)
 
         res = decompIfc.decompileFunction(currentFunction, 30, monitor)
 
@@ -391,6 +413,27 @@ if __name__ == "__main__":
             iop = IOParser(clangAST, skipEmpty=True, prog=prog, stringTable=stringTable)
             iop.cleanup()
 
-        decomp.dispose()
+            namespace = currentFunction.getParentNamespace()
+            fname = currentFunction.getName()
 
-    cleanup()
+            if namespace and not namespace.isGlobal():
+                fname = "{}::{}".format(namespace.getName(True), fname)
+
+            functions[fname] = {
+                "simpleName": currentFunction.getName(),
+                "qualifiedNamespace": namespace.getName(True),
+                "entry": currentFunction.getEntryPoint().toString(),
+                "decompiled": res.getDecompiledFunction().getC(),
+                "cleaned": None,
+                "nop": is_no_op_function(clangAST)
+            }
+
+        currentFunction = prog.getFunctionAfter(currentFunction)
+
+    output_dir = os.environ.get("MALWHERE_ANALYSIS_PATH", os.path.dirname(os.path.realpath(__file__)))
+    print("[C3] Output directory {}".format(output_dir))
+
+    with open(os.path.join(output_dir, "{}.json".format(prog.getProgramFile().getName())), 'w') as funcFile:
+        funcFile.write(json.dumps(functions))
+
+    decomp.dispose()

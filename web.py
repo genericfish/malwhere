@@ -2,7 +2,7 @@ import os
 import time
 import hashlib
 import flask
-import tomllib
+import json
 import subprocess
 from pathlib import Path
 from functools import partial
@@ -15,6 +15,10 @@ cfg = Config()
 
 # Path to Ghidra installation
 ghidra_path = Path(cfg.get("ghidra/path"))
+
+# Path to Ghidra analysis output
+analysis_path = Path(cfg.get("analysis/output"))
+analysis_path.mkdir(parents=True, exist_ok=True)
 
 # Get path to Ghidra project, make dirs if not exist
 project_path = Path(cfg.get("ghidra/project/path"))
@@ -93,7 +97,13 @@ def upload():
 
 @app.route("/analysis/<submission_id>")
 def analysis(submission_id):
-    return render_template("analysis.html", submission_id=submission_id)
+    funcs = analysis_path.joinpath(f"{submission_id}.json").absolute()
+    functions = None
+    with open(funcs, "r") as data:
+        functions = json.load(data)
+
+    return render_template("analysis.html", submission_id=submission_id, functions=functions)
+
 
 
 def analyze_binary(abs_path_to_binary):
@@ -110,4 +120,7 @@ def analyze_binary(abs_path_to_binary):
 
     print(f"Running subprocess with command: \"{command}\"")
 
-    subprocess.run(command, shell=True)
+    env = os.environ.copy()
+    env["MALWHERE_ANALYSIS_PATH"] = str(analysis_path.absolute())
+
+    subprocess.run(command, shell=True, env=env)

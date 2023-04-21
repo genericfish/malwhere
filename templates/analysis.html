@@ -8,5 +8,11 @@
 </head>
 <body>
     <h1>{{ submission_id }}</h1>
+    {% for fname, data in functions.items() %}
+    <div class="function">
+        {{ data["simpleName"] }}
+        {{ data["qualifiedNamespace"] }}
+    </div>
+    {% endfor %}
 </body>
 </html>
