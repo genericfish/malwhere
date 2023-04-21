@@ -42,7 +42,10 @@ class ASTNode(object):
                 high_symbol = high.getSymbol()
 
                 if high_symbol:
-                    self.var_address = str(high_symbol.getPCAddress())
+                    address = high_symbol.getPCAddress()
+
+                    if address:
+                        self.var_address = str(address)
 
         if isinstance(clang_token, ClangToken):
             pcode = clang_token.getPcodeOp()

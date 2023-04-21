@@ -64,13 +64,13 @@
                 text = ""
 
                 if (token.hasAttribute("data-min-address"))
-                text += `min-addr: 0x${token.getAttribute("data-min-address")}`
+                    text += `min-addr: 0x${token.getAttribute("data-min-address")}`
 
                 if (token.hasAttribute("data-max-address"))
-                text += `\nmax-addr: 0x${token.getAttribute("data-max-address")}`
+                    text += `\nmax-addr: 0x${token.getAttribute("data-max-address")}`
 
                 if (token.hasAttribute("data-var-address"))
-                text += `\nvar-addr: 0x${token.getAttribute("data-var-address")}`
+                    text += `\nvar-addr: 0x${token.getAttribute("data-var-address")}`
 
                 if (text.length == 0)
                     return

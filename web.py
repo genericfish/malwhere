@@ -29,7 +29,7 @@ project_path.mkdir(parents=True, exist_ok=True)
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.urandom(12).hex()
-binary_path = partial(Path, cfg.get("binary/path"))
+binary_path = partial(Path, cfg.get("binary/output"))
 
 
 def get_ghidra_command(*args):
@@ -101,6 +101,7 @@ def upload():
 def analysis(submission_id):
     funcs = analysis_path.joinpath(f"{submission_id}.json").absolute()
     functions = None
+
     with open(funcs, "r") as data:
         functions = json.load(data)
 
@@ -109,13 +110,16 @@ def analysis(submission_id):
 
 def analyze_binary(abs_path_to_binary):
     script_path = Path(cfg.get("ghidra/script/path")).absolute()
-    script = cfg.get("ghidra/script/file")
+    scripts = cfg.get("ghidra/script/files")
+
+    if type(scripts) == str:
+        scripts = [scripts]
 
     # TODO: Containerize this shit
     command = get_ghidra_command(
         "-import", abs_path_to_binary,
         "-scriptPath", script_path,
-        "-postScript", script,
+        *["-postScript " + script for script in scripts],
         "-overwrite"
     )
 
