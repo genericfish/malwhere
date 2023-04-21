@@ -19,6 +19,31 @@
             background: black;
             border: 1px solid white;
         }
+
+        .token.VariableToken {
+            color: olive;
+        }
+
+        .token.FuncNameToken {
+            color: goldenrod;
+        }
+
+        .token.TypeToken {
+            color: cadetblue;
+        }
+
+        .token.OpToken {
+            color: indianred;
+        }
+
+        .token.constant {
+            color: orange;
+        }
+
+        .token.CommentToken {
+            color: grey;
+        }
+
     </style>
 </head>
 <body>
@@ -34,7 +59,7 @@
         <br>
         {% else %}
         <span
-            class="token {{ token['type'] }}"
+            class="token {{ token['type'] }} {% if 'constant' in token %}constant{% endif %}"
             {% if 'min_address' in token %}
             data-min-address="{{ token['min_address'] }}"
             {% endif %}
@@ -43,6 +68,9 @@
             {% endif %}
             {% if 'var_address' in token %}
             data-var-address="{{ token['var_address'] }}"
+            {% endif %}
+            {% if 'constant' in token %}
+            data-constant="1"
             {% endif %}
         >{{ token["value"] }}</span>
         {% endif %}
@@ -60,6 +88,7 @@
         document.body.appendChild(popup)
 
         for (let token of tokens) {
+
             token.addEventListener("mouseover", event => {
                 text = ""
 
@@ -72,15 +101,19 @@
                 if (token.hasAttribute("data-var-address"))
                     text += `\nvar-addr: 0x${token.getAttribute("data-var-address")}`
 
+                if (token.hasAttribute("data-constant"))
+                    text += `\nconstant`
+
                 if (text.length == 0)
                     return
 
                 popup.style.display = null
                 popup.innerText = text
 
-                bbox = popup.getBoundingClientRect()
-                popup.style.top = `${event.clientY - bbox.height}px`
-                popup.style.left = `${event.clientX}px`
+                bbox = token.getBoundingClientRect()
+                pbbox = popup.getBoundingClientRect()
+                popup.style.top = `${bbox.y - pbbox.height}px`
+                popup.style.left = `${Math.max(1, bbox.x - pbbox.width / 2)}px`
             })
             token.addEventListener("mouseleave", _ => popup.style.display = "none")
         }

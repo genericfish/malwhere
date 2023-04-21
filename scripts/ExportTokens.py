@@ -35,17 +35,18 @@ class ASTNode(object):
         if max_address:
             self.max_address = str(max_address)
 
+        varnode = clang_token.getVarnode()
+
         if type(clang_token) == ClangVariableToken:
             high = clang_token.getHighVariable()
 
-            if high:
-                high_symbol = high.getSymbol()
+            if varnode:
+                if varnode.isConstant():
+                    self.constant = True
 
-                if high_symbol:
-                    address = high_symbol.getPCAddress()
-
-                    if address:
-                        self.var_address = str(address)
+                address = varnode.getPCAddress()
+                if address:
+                    self.var_address = str(address)
 
         if isinstance(clang_token, ClangToken):
             pcode = clang_token.getPcodeOp()
@@ -90,6 +91,6 @@ if __name__ == "__main__":
     print("[C3] Output directory {}".format(output_dir))
 
     with open(os.path.join(output_dir, "{}.json".format(prog.getProgramFile().getName())), 'w') as funcFile:
-        funcFile.write(json.dumps(functions, default=lambda o: o.__dict__, sort_keys=True))
+        funcFile.write(json.dumps(functions, default=lambda o: o.__dict__, sort_keys=False))
 
     decomp.dispose()
