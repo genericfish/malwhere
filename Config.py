@@ -1,13 +1,13 @@
-import tomllib
+import json
 from functools import reduce
 import operator
 
 class Config():
-    def __init__(self, cfg_file = "./config.toml"):
+    def __init__(self, cfg_file = "./config.json"):
         # Open config file
         try:
             with open(cfg_file, "rb") as f:
-                self.cfg = tomllib.load(f)
+                self.cfg = json.load(f)
                 assert self.cfg
 
         except IOError as e:

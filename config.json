@@ -1,0 +1,21 @@
+{
+    "binary": {
+        "output": "./files"
+    },
+    "analysis": {
+        "output": "./analyzed"
+    },
+    "ghidra": {
+        "path": "C:\\Users\\Brandon\\Documents\\Sandbox\\ghidra_10.2.3_PUBLIC",
+        "script": {
+            "path": "./scripts",
+            "files": [
+                "ExportTokens.py"
+            ]
+        },
+        "project": {
+            "name": "malwhere",
+            "path": "./ghidra"
+        }
+    }
+}
