@@ -11,7 +11,8 @@ path = "C:\\Users\\Brandon\\Documents\\Sandbox\\ghidra_10.2.3_PUBLIC"
 
 [ghidra.script]
 # Filename of the script to run
-file = "ExportFunctions.py"
+# TODO: Add ability to run multiple scripts
+file = "ExportTokens.py"
 
 # Path to scripts directory
 path = "./scripts"
