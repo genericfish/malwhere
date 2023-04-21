@@ -7,22 +7,30 @@ import subprocess
 from pathlib import Path
 from functools import partial
 from flask import Flask, request, redirect, render_template, url_for
+from Config import Config
 
-try:
-    with open("./config.toml", "rb") as f:
-        cfg = tomllib.load(f)
-except IOError as e:
-    exit(1)
 
-ghidra_path = Path(cfg["ghidra"]["path"])
-project_path = Path(cfg["ghidra"]["project"]["path"])
-project_path.mkdir(exist_ok=True)
+# Load config
+cfg = Config()
+
+# Path to Ghidra installation
+ghidra_path = Path(cfg.get("ghidra/path"))
+
+# Get path to Ghidra project, make dirs if not exist
+project_path = Path(cfg.get("ghidra/project/path"))
+project_path.mkdir(parents=True, exist_ok=True)
+
+# Initialize Flask app
+app = Flask(__name__)
+app.secret_key = os.urandom(12).hex()
+binary_path = partial(Path, cfg.get("binary/path"))
+
 
 def get_ghidra_command(*args):
     command = [
         ghidra_path.joinpath("./support", "analyzeHeadless").absolute(),
         project_path.absolute(),
-        cfg["ghidra"]["project"]["name"]
+        cfg.get("ghidra/project/name")
     ]
 
     command += args
@@ -30,11 +38,6 @@ def get_ghidra_command(*args):
     command = map(str, command)
 
     return ' '.join(command)
-
-app = Flask(__name__)
-app.secret_key = os.urandom(12).hex()
-binary_path = partial(Path, cfg["binary"]["path"])
-
 
 def timestamp_ms():
     return round(time.time() * 1000)
@@ -76,8 +79,10 @@ def upload():
     # Save binary file
     path = binary_path(binary_hash).absolute()
 
-    binary.stream.seek(0);
-    binary.save(path)
+    # TODO: Ask user to confirm reanalyse of file that already exists
+    if not path.exists():
+        binary.stream.seek(0);
+        binary.save(path)
 
     # FIXME: Use server-sent events via flask-sse to have the user load into a
     #        waiting page as Ghidra analyses a file, then callback when done.
@@ -88,18 +93,21 @@ def upload():
 
 @app.route("/analysis/<submission_id>")
 def analysis(submission_id):
-    return f"Hello, {submission_id}"
+    return render_template("analysis.html", submission_id=submission_id)
 
 
 def analyze_binary(abs_path_to_binary):
+    script_path = Path(cfg.get("ghidra/script/path")).absolute()
+    script = cfg.get("ghidra/script/file")
+
+    # TODO: Containerize this shit
     command = get_ghidra_command(
         "-import", abs_path_to_binary,
-        "-scriptPath", Path(cfg["ghidra"]["script"]["path"]).absolute(),
-        "-postScript", cfg["ghidra"]["script"]["file"],
+        "-scriptPath", script_path,
+        "-postScript", script,
+        "-overwrite"
     )
 
     print(f"Running subprocess with command: \"{command}\"")
 
     subprocess.run(command, shell=True)
-
-    print(command)
