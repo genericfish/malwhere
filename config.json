@@ -10,6 +10,8 @@
         "script": {
             "path": "./scripts",
             "files": [
+                "CleanIO.py",
+                "Rename.py",
                 "ExportTokens.py"
             ]
         },
