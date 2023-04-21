@@ -24,14 +24,7 @@ class ASTNode(object):
     def __init__(self, clang_token):
         self.type = re.search(r'\.Clang(\w+)\'', str(type(clang_token))).groups()[0]
 
-        if clang_token.numChildren() > 0:
-            self.children = []
-
-            for i in range(clang_token.numChildren()):
-                child = clang_token.Child(i)
-                self.children.append(ASTNode(child))
-        else:
-            self.value = str(clang_token)
+        self.value = str(clang_token)
 
         min_address = clang_token.getMinAddress()
         max_address = clang_token.getMaxAddress()
@@ -50,12 +43,12 @@ class ASTNode(object):
 
 
 class Function(object):
-    def __init__(self, func, ast):
+    def __init__(self, func, flat_ast):
         self.simpleName = func.getName()
         self.namespace = func.getParentNamespace().getName(True)
         self.entry = func.getEntryPoint().toString()
 
-        self.tokens = ASTNode(ast)
+        self.tokens = [ASTNode(node) for node in flat_ast]
 
 if __name__ == "__main__":
     prog = FlatProgramAPI(currentProgram, monitor)
@@ -73,9 +66,11 @@ if __name__ == "__main__":
         if res.decompileCompleted():
             clangAST = res.getCCodeMarkup()
             fname = currentFunction.getName()
+            tokens = []
+            clangAST.flatten(tokens)
             print("[C3] Decompiled {}".format(fname))
 
-            functions[fname] = Function(currentFunction, clangAST)
+            functions[fname] = Function(currentFunction, tokens)
 
         currentFunction = prog.getFunctionAfter(currentFunction)
 

@@ -5,14 +5,68 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Malwhere: Analysis</title>
+
+    <style>
+        html, body {
+            background: black;
+            color: white;
+
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .popup {
+            position: fixed;
+            background: black;
+            border: 1px solid white;
+        }
+    </style>
 </head>
 <body>
     <h1>{{ submission_id }}</h1>
     {% for fname, data in functions.items() %}
-    <div class="function">
-        {{ data["simpleName"] }}
-        {{ data["qualifiedNamespace"] }}
+    <div id="{{ fname }}" class="function">
+        <div class="info">
+            <span class="name">{{ data["simpleName"] }}</span>
+            <span class="address">{{ data["entry"] }}</span>
+        </div>
+        {% for token in data["tokens"] %}
+        {% if token["type"] == "Break" %}
+        <br>
+        {% else %}
+        <span
+            class="token {{ token['type'] }}"
+            {% if 'min_address' in token %}
+            data-min-address="{{ token['min_address'] }}"
+            {% endif %}
+            {% if 'max_address' in token %}
+            data-max-address="{{ token['max_address'] }}"
+            {% endif %}
+        >{{ token["value"] }}</span>
+        {% endif %}
+        {% endfor %}
     </div>
     {% endfor %}
+
+    <script>
+        const functions = document.getElementsByClassName("function")
+        const tokens = document.getElementsByClassName("token")
+
+        const popup = document.createElement("div")
+        popup.classList.add("popup")
+
+        document.body.appendChild(popup)
+
+        for (let token of tokens) {
+            if (token.hasAttribute("data-min-address"))
+                token.addEventListener("mouseover", event => {
+                    popup.style.display = null
+                    popup.innerText = `min-addr: 0x${token.getAttribute("data-min-address")}\nmax-addr: 0x${token.getAttribute("data-max-address")}`
+                    bbox = popup.getBoundingClientRect()
+                    popup.style.top = `${event.clientY - bbox.height}px`
+                    popup.style.left = `${event.clientX}px`
+                })
+                token.addEventListener("mouseleave", _ => popup.style.display = "none")
+        }
+    </script>
 </body>
 </html>
