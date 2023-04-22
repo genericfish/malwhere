@@ -1,9 +1,10 @@
 import json
-from functools import reduce
 import operator
+from functools import reduce
+from pathlib import Path
 
-class Config():
-    def __init__(self, cfg_file = "./config.json"):
+class Config:
+    def __init__(self, cfg_file="./config.json"):
         # Open config file
         try:
             with open(cfg_file, "rb") as f:
@@ -15,5 +16,8 @@ class Config():
             exit(1)
 
     def get(self, path):
-        path_list = path.split('/')
+        path_list = path.split("/")
         return reduce(operator.getitem, path_list, self.cfg)
+
+    def get_path(self, path):
+        return Path(self.get(path))
