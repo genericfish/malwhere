@@ -374,18 +374,14 @@ if __name__ == "__main__":
     prog = FlatProgramAPI(currentProgram, monitor)
     decomp = FlatDecompilerAPI(prog)
 
-    def cleanup():
-        currentFunction = prog.getFunctionContaining(currentAddress)
+    decomp.initialize()
+    decompIfc = decomp.getDecompiler()
+    stringTable = create_string_table(prog, decompIfc)
 
-        if not currentFunction:
-            print("[C3] No function containing current address.")
-            return
+    currentFunction = prog.getFirstFunction()
 
+    while currentFunction:
         print("[C3] Cleaning stream operations in {} @ {}".format(currentFunction.getName(), currentFunction.getEntryPoint()))
-        decomp.initialize()
-        decompIfc = decomp.getDecompiler()
-
-        stringTable = create_string_table(prog, decompIfc)
 
         res = decompIfc.decompileFunction(currentFunction, 30, monitor)
 
@@ -394,9 +390,6 @@ if __name__ == "__main__":
             iop = IOParser(clangAST, skipEmpty=True, prog=prog, stringTable=stringTable)
             iop.cleanup()
 
-        
-        
+        currentFunction = prog.getFunctionAfter(currentFunction)
 
-        decomp.dispose()
-
-    cleanup()
+    decomp.dispose()
