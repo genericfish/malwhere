@@ -22,57 +22,46 @@
         </ul>
         <div id="function-code">
             {% set indent = namespace(value=0) %}
-            {% for fname, data in functions.items() %}
+            {%- for fname, data in functions.items() -%}
             <div id="{{ data['entry'] }}" class="function" style="display: none;">
                 <div class="info">
                     <span class="name">Function: {{ data["simpleName"] }}</span>
                     <span class="address">(entry: {{ data["entry"] }})</span>
                 </div>
-                {% for token in data["tokens"] %}
-                {% if token["type"] == "Break" %}
-                <br>
-                <span>{{ "&nbsp;"|safe*4*indent.value }}</span>
-                {% elif token["type"] == "SyntaxToken" and (token["value"] == "{" or token["value"] == "}") %}
-                    {% if token["value"] == "{" %}
-                    {% set indent.value = indent.value + 1 %}
-                    {% elif token["value"] == "}" %}
-                    {% set indent.value = indent.value - 1 %}
-                    {% endif %}
-                    <span
-                    class="token {{ token['type'] }} {% if 'constant' in token %}constant{% endif %}"
-                    {% if 'min_address' in token %}
-                    data-min-address="{{ token['min_address'] }}"
-                    {% endif %}
-                    {% if 'max_address' in token %}
-                    data-max-address="{{ token['max_address'] }}"
-                    {% endif %}
-                    {% if 'var_address' in token %}
-                    data-var-address="{{ token['var_address'] }}"
-                    {% endif %}
-                    {% if 'constant' in token %}
-                    data-constant="1"
-                    {% endif %}
-                >{{ token["value"] }}</span>
-                {% else %}
-                <span
-                    class="token {{ token['type'] }} {% if 'constant' in token %}constant{% endif %}"
-                    {% if 'min_address' in token %}
-                    data-min-address="{{ token['min_address'] }}"
-                    {% endif %}
-                    {% if 'max_address' in token %}
-                    data-max-address="{{ token['max_address'] }}"
-                    {% endif %}
-                    {% if 'var_address' in token %}
-                    data-var-address="{{ token['var_address'] }}"
-                    {% endif %}
-                    {% if 'constant' in token %}
-                    data-constant="1"
-                    {% endif %}
-                >{{ token["value"] }}</span>
-                {% endif %}
-                {% endfor %}
+                {%- for token in data["tokens"] -%}
+                    {%- if token["type"] == "SyntaxToken" and token["value"] == "{" -%}
+                        {% set indent.value = indent.value + 1 %}
+                    {%- endif -%}
+
+
+                    {%- if loop.index + 1 < data["tokens"]|length -%} 
+                        {% set next = data["tokens"][loop.index + 1] %}
+                        {%- if next["type"] == "SyntaxToken" and next["value"] == "}" -%}
+                            {% set indent.value = indent.value - 1 %}
+                        {%- endif -%}
+                    {%- endif -%}
+                    {%- if token["type"] == "Break" -%}
+                        <br>
+                        <span>{{ "&nbsp;"|safe*4*indent.value }}</span>
+                    {%- else -%}
+                        <span class="token {{ token['type'] }} {% if 'constant' in token %}constant{% endif %}"
+                            {%- if 'min_address' in token -%}
+                            data-min-address="{{ token['min_address'] }}"
+                            {%- endif -%}
+                            {%- if 'max_address' in token -%}
+                            data-max-address="{{ token['max_address'] }}"
+                            {%- endif -%}
+                            {%- if 'var_address' in token -%}
+                            data-var-address="{{ token['var_address'] }}"
+                            {%- endif -%}
+                            {%- if 'constant' in token -%}
+                            data-constant="1"
+                            {%- endif -%}
+                        >{{ token["value"] }}</span>
+                    {%- endif -%}
+                {%- endfor -%}
             </div>
-            {% endfor %}
+            {%- endfor -%}
         </div>
     </div>
 
