@@ -29,8 +29,9 @@ project_path.mkdir(parents=True, exist_ok=True)
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.urandom(12).hex()
-binary_path = partial(Path, cfg.get("binary/output"))
 
+binary_path = partial(Path, cfg.get("binary/output"))
+binary_path().mkdir(parents=True, exist_ok=True)
 
 def get_ghidra_command(*args):
     command = [
