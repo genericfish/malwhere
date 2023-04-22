@@ -12,6 +12,11 @@
     color: goldenrod;
 }
 
+.token.FuncNameToken[data-func-address] {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 .token.TypeToken {
     color: cadetblue;
 }

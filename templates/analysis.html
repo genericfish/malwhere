@@ -16,17 +16,17 @@
     </nav>
     <div class="container">
         <ul id="function-tree">
-        {% for fname, data in functions.items() %}
-            <li><span data-func="{{ data['entry'] }}">{{ data["simpleName"] }}</span></li>
+        {% for entry, data in functions.items() %}
+            <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
         {% endfor %}
         </ul>
         <div id="function-code">
             {% set indent = namespace(value=0) %}
-            {%- for fname, data in functions.items() -%}
-            <div id="{{ data['entry'] }}" class="function" style="display: none;">
+            {%- for entry, data in functions.items() -%}
+            <div id="{{ entry }}" class="function" style="display: none;">
                 <div class="info">
-                    <span class="name">Function: {{ data["simpleName"] }}</span>
-                    <span class="address">(entry: {{ data["entry"] }})</span>
+                    <span class="name">Function: {{ data["name"] }}</span>
+                    <span class="address">(entry: {{ entry }})</span>
                 </div>
                 {%- for token in data["tokens"] -%}
                     {%- if token["type"] == "SyntaxToken" and token["value"] == "{" -%}
@@ -44,18 +44,11 @@
                         <br>
                         <span>{{ "&nbsp;"|safe*4*indent.value }}</span>
                     {%- else -%}
-                        <span class="token {{ token['type'] }} {% if 'constant' in token %}constant{% endif %}"
-                            {%- if 'min_address' in token -%}
-                            data-min-address="{{ token['min_address'] }}"
-                            {%- endif -%}
-                            {%- if 'max_address' in token -%}
-                            data-max-address="{{ token['max_address'] }}"
-                            {%- endif -%}
-                            {%- if 'var_address' in token -%}
-                            data-var-address="{{ token['var_address'] }}"
-                            {%- endif -%}
-                            {%- if 'constant' in token -%}
-                            data-constant="1"
+                        <span class="token {{ token['type'] }} {% if 'props' in token and 'const' in token['props'] -%}constant{% endif %}"
+                            {%- if 'props' in token -%}
+                                {%- for prop, value in token['props'].items() -%}
+                                data-{{ prop }}="{{ value }}"
+                                {%- endfor -%}
                             {%- endif -%}
                         >{{ token["value"] }}</span>
                     {%- endif -%}
@@ -68,59 +61,88 @@
     <script>
         const functions = document.getElementsByClassName("function")
         const tokens = document.getElementsByClassName("token")
+        const functionTree = document.getElementById("function-tree")
 
         const popup = document.createElement("div")
         popup.classList.add("popup")
 
         document.body.appendChild(popup)
 
-        for (let token of tokens) {
-            token.addEventListener("mouseover", event => {
-                text = ""
-
-                if (token.hasAttribute("data-min-address"))
-                    text += `min-addr: 0x${token.getAttribute("data-min-address")}`
-
-                if (token.hasAttribute("data-max-address"))
-                    text += `\nmax-addr: 0x${token.getAttribute("data-max-address")}`
-
-                if (token.hasAttribute("data-var-address"))
-                    text += `\nvar-addr: 0x${token.getAttribute("data-var-address")}`
-
-                if (token.hasAttribute("data-constant"))
-                    text += `\nconstant`
-
-                if (text.length == 0)
-                    return
-
-                popup.style.display = null
-                popup.innerText = text
-
-                bbox = token.getBoundingClientRect()
-                pbbox = popup.getBoundingClientRect()
-                popup.style.top = `${bbox.y - pbbox.height}px`
-                popup.style.left = `${Math.max(1, bbox.x - pbbox.width / 2)}px`
-            })
-
-            token.addEventListener("mouseleave", _ => popup.style.display = "none")
-        }
-
-        const functionTree = document.getElementById("function-tree")
         let activeFunction = null
-        for (let func of functionTree.children) {
-            const span = func.children[0]
 
-            func.addEventListener("click", _ => {
-                if (activeFunction)
-                    activeFunction.style.display = "none"
+        function setActiveFunction(func, pushState=true) {
+            if (activeFunction)
+                activeFunction.style.display = "none"
 
-                const id = span.getAttribute("data-func")
-                console.log(id)
+            activeFunction = document.getElementById(func)
 
-                activeFunction = document.getElementById(id)
-                activeFunction.style.display = null
-            })
+            if (!activeFunction)
+                return;
+
+            activeFunction.style.display = null
+
+            if (pushState)
+                history.pushState({curr: new Date().getTime()}, null, `#${func}`)
         }
+
+        function setActiveHash() {
+            const hash = window.location.hash
+
+            if (hash)
+                setActiveFunction(hash.substr(1), false)
+        }
+
+        window.addEventListener("load", _ => {
+            for (let token of tokens) {
+                if (token.hasAttribute("data-func-address")) {
+                    token.addEventListener("click", _ => setActiveFunction(token.getAttribute("data-func-address")))
+                }
+
+                token.addEventListener("mouseover", event => {
+                    text = ""
+
+                    // FIXME: There has to be a better way
+                    if (token.hasAttribute("data-min-address"))
+                        text += `min-addr: 0x${token.getAttribute("data-min-address")}`
+
+                    if (token.hasAttribute("data-max-address"))
+                        text += `\nmax-addr: 0x${token.getAttribute("data-max-address")}`
+
+                    if (token.hasAttribute("data-var-address"))
+                        text += `\nvar-addr: 0x${token.getAttribute("data-var-address")}`
+
+                    if (token.hasAttribute("data-const"))
+                        text += `\nconstant`
+
+                    if (token.hasAttribute("data-func-address"))
+                        text += `\nfunc-ptr: 0x${token.getAttribute("data-func-address")}`
+
+                    if (text.length == 0)
+                        return
+
+                    popup.style.display = null
+                    popup.innerText = text
+
+                    bbox = token.getBoundingClientRect()
+                    pbbox = popup.getBoundingClientRect()
+                    popup.style.top = `${bbox.y - pbbox.height}px`
+                    popup.style.left = `${Math.max(1, bbox.x - pbbox.width / 2)}px`
+                })
+
+                token.addEventListener("mouseleave", _ => popup.style.display = "none")
+            }
+
+            for (let func of functionTree.children) {
+                const span = func.children[0]
+
+                func.addEventListener("click", _ => setActiveFunction(span.getAttribute("data-func")))
+            }
+
+            window.addEventListener("popstate", _ => setActiveHash())
+
+            setActiveHash()
+        })
+
     </script>
 </body>
 </html>

@@ -25,15 +25,15 @@ class ASTNode(object):
         self.type = re.search(r'\.Clang(\w+)\'', str(type(clang_token))).groups()[0]
 
         self.value = str(clang_token)
+        self.props = {}
 
         min_address = clang_token.getMinAddress()
-        max_address = clang_token.getMaxAddress()
-
         if min_address:
-            self.min_address = str(min_address)
+            self.props["min-address"] = str(min_address)
 
+        max_address = clang_token.getMaxAddress()
         if max_address:
-            self.max_address = str(max_address)
+            self.props["max-address"] = str(max_address)
 
         varnode = clang_token.getVarnode()
 
@@ -42,11 +42,21 @@ class ASTNode(object):
 
             if varnode:
                 if varnode.isConstant():
-                    self.constant = True
+                    self.props["const"] = True
 
                 address = varnode.getPCAddress()
                 if address:
-                    self.var_address = str(address)
+                    self.props["var-address"] = str(address)
+
+        if type(clang_token) == ClangFuncNameToken:
+            # "ClangFuncNameToken unused field hfunc"
+            # https://github.com/NationalSecurityAgency/ghidra/issues/1983
+            # Alternative: Get address via pcode
+            pcode = clang_token.getPcodeOp()
+
+            if pcode and pcode.getOpcode() == PcodeOp.CALL:
+                func_ptr = pcode.getInput(0).getAddress()
+                self.props["func-address"] = str(func_ptr)
 
         if isinstance(clang_token, ClangToken):
             pcode = clang_token.getPcodeOp()
@@ -54,12 +64,14 @@ class ASTNode(object):
             if pcode:
                 self.pcode = str(pcode)
 
+        if not self.props:
+            del(self.props)
+
 
 class Function(object):
     def __init__(self, func, flat_ast):
-        self.simpleName = func.getName()
+        self.name = func.getName()
         self.namespace = func.getParentNamespace().getName(True)
-        self.entry = func.getEntryPoint().toString()
 
         self.tokens = [ASTNode(node) for node in flat_ast]
 
@@ -78,19 +90,21 @@ if __name__ == "__main__":
 
         if res.decompileCompleted():
             clangAST = res.getCCodeMarkup()
-            fname = currentFunction.getName()
+            entry = currentFunction.getEntryPoint()
             tokens = []
             clangAST.flatten(tokens)
-            print("[C3] Decompiled {}".format(fname))
+            print("[C3] Decompiled {}".format(currentFunction.getName()))
 
-            functions[fname] = Function(currentFunction, tokens)
+            functions[str(entry)] = Function(currentFunction, tokens)
 
         currentFunction = prog.getFunctionAfter(currentFunction)
 
     output_dir = os.environ.get("MALWHERE_ANALYSIS_PATH", os.path.dirname(os.path.realpath(__file__)))
     print("[C3] Output directory {}".format(output_dir))
 
-    with open(os.path.join(output_dir, "{}.json".format(prog.getProgramFile().getName())), 'w') as funcFile:
+    prog_name = prog.getProgramFile().getName() if prog.getProgramFile() else "ast"
+
+    with open(os.path.join(output_dir, "{}.json".format(prog_name)), 'w') as funcFile:
         funcFile.write(json.dumps(functions, default=lambda o: o.__dict__, sort_keys=False))
 
     decomp.dispose()
