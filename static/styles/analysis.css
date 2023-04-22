@@ -1,0 +1,73 @@
+.popup {
+    position: fixed;
+    background: black;
+    border: 1px solid white;
+}
+
+.token.VariableToken {
+    color: olive;
+}
+
+.token.FuncNameToken {
+    color: goldenrod;
+}
+
+.token.TypeToken {
+    color: cadetblue;
+}
+
+.token.OpToken {
+    color: indianred;
+}
+
+.token.constant {
+    color: orange;
+}
+
+.token.CommentToken {
+    color: grey;
+}
+
+.container {
+    max-width: inherit;
+    display: flex;
+    gap: 2rem;
+}
+
+#function-tree {
+    max-width: 250px;
+    max-height: calc(100vh - 8rem);
+    overflow: auto;
+    list-style-type: none;
+    line-height: 1.25rem;
+
+    border: 1px solid white;
+    margin: 0;
+    padding: 1.25rem;
+}
+
+
+#function-tree>li {
+    color: cornflowerblue;
+    cursor: pointer;
+}
+
+#function-tree>li:hover {
+    color: lightblue;
+}
+
+
+.function {
+    width: 80vw;
+    height: 100%;
+    max-height: calc(100vh - 8rem);
+    overflow: auto;
+
+    border: 1px solid white;
+}
+
+.function>.info>.name {
+    font-size: 2rem;
+    display: block;
+    word-wrap: break-word;
+}

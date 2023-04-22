@@ -1,0 +1,41 @@
+html,
+body {
+    background: black;
+    color: white;
+
+    font-family: 'Courier New', Courier, monospace;
+}
+
+nav {
+    margin: 0;
+    margin: 1rem 0 1rem 0;
+    line-height: 2rem;
+    font-size: 2rem;
+
+    max-height: 4rem;
+}
+
+nav>div {
+    display: inline;
+}
+
+a {
+    color: cadetblue;
+}
+
+.container {
+    max-width: 760px;
+
+    margin: 0 auto;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.file-upload {
+    border: 2px solid indianred;
+    display: inline-block;
+    padding: .5rem 1rem;
+    cursor: pointer;
+}

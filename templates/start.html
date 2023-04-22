@@ -5,15 +5,24 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Malwhere: Start</title>
+
+    <link rel="stylesheet" href="/static/styles/main.css">
 </head>
 <body>
-    {% for message in get_flashed_messages(False, ["error"]) %}
-    <div class="flash">{{ message }}</div>
-    {% endfor %}
+    <nav>
+        <div id="logo"><a href="/">malwhere</a></div>
+        <div id="program">🤷</div>
+    </nav>
 
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="binary" id="binary">
-        <input type="submit" value="Submit">
-    </form>
+    <div class="container">
+        {% for message in get_flashed_messages(False, ["error"]) %}
+        <div class="flash">{{ message }}</div>
+        {% endfor %}
+
+        <form id="binary-upload" action="/upload/file" method="post" enctype="multipart/form-data">
+            <label for="binary" class="file-upload">Upload ELF or PE executable</label>
+            <input type="file" name="binary" id="binary" onchange="form.submit()">
+        </form>
+    </div>
 </body>
 </html>
