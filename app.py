@@ -16,7 +16,7 @@ from malwhere import Config, Ghidra
 cfg = Config()
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="/static")
 app.secret_key = os.urandom(12).hex()
 
 binary_path = partial(Path, cfg.get("binary/output"))
