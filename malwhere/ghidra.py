@@ -9,6 +9,12 @@ class Ghidra:
         # Path to Ghidra installation
         self.ghidra_path = cfg.get_path("ghidra/path")
 
+        # Assert that Ghidra headlessAnalyze exists
+        headlessAnalyze = self.ghidra_path.joinpath("support", "analyzeHeadless")
+        if not headlessAnalyze.exists():
+            print("[malwhere] ERROR: Incorrect Ghidra path.")
+            print("\tPoint path to the directory that contains the 'support' directory, which contains the 'analyzeHeadless' script.")
+            exit(1)
 
         # Path to Ghidra analysis output
         self.analysis_path = cfg.get_path("analysis/output")
@@ -20,7 +26,7 @@ class Ghidra:
 
     def get_ghidra_command(self, *args):
         command = [
-            self.ghidra_path.joinpath("./support", "analyzeHeadless").absolute(),
+            self.ghidra_path.joinpath("support", "analyzeHeadless").absolute(),
             self.project_path.absolute(),
             self.cfg.get("ghidra/project/name"),
         ]
