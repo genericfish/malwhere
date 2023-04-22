@@ -40,8 +40,15 @@ def start_page():
     return render_template("start.html")
 
 
-@app.route("/upload", methods=["POST", "GET"])
-def upload():
+@app.route("/upload/url", methods=["POST", "GET"])
+def upload_url():
+    if request.method == "GET":
+        return redirect("/")
+
+    return flash("Not yet implemented")
+
+@app.route("/upload/file", methods=["POST", "GET"])
+def upload_file():
     if request.method == "GET":
         return redirect("/")
 
