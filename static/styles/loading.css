@@ -10,10 +10,6 @@
     }
 }
 
-* {
-    box-sizing: border-box;
-}
-
 #box-container {
     position: fixed;
     height: 100%;

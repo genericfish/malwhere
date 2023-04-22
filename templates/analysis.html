@@ -33,7 +33,6 @@
                         {% set indent.value = indent.value + 1 %}
                     {%- endif -%}
 
-
                     {%- if loop.index + 1 < data["tokens"]|length -%} 
                         {% set next = data["tokens"][loop.index + 1] %}
                         {%- if next["type"] == "SyntaxToken" and next["value"] == "}" -%}
@@ -92,6 +91,12 @@
                 setActiveFunction(hash.substr(1), false)
         }
 
+        const popup_fields = {
+            "min-address": "min addr",
+            "max-address": "max addr",
+            "func-address": "func ptr",
+        }
+
         window.addEventListener("load", _ => {
             for (let token of tokens) {
                 if (token.hasAttribute("data-func-address")) {
@@ -99,34 +104,35 @@
                 }
 
                 token.addEventListener("mouseover", event => {
-                    text = ""
+                    lines = []
 
-                    // FIXME: There has to be a better way
-                    if (token.hasAttribute("data-min-address"))
-                        text += `min-addr: 0x${token.getAttribute("data-min-address")}`
+                    for (const attr of token.attributes) {
+                        let name = attr.name
 
-                    if (token.hasAttribute("data-max-address"))
-                        text += `\nmax-addr: 0x${token.getAttribute("data-max-address")}`
+                        if (name.includes("data")) {
+                            name = name.replace("data-", "")
 
-                    if (token.hasAttribute("data-var-address"))
-                        text += `\nvar-addr: 0x${token.getAttribute("data-var-address")}`
+                            if (name in popup_fields)
+                                name = popup_fields[name]
 
-                    if (token.hasAttribute("data-const"))
-                        text += `\nconstant`
+                            lines.push(`${name}: ${attr.value}`)
+                        }
+                    }
 
-                    if (token.hasAttribute("data-func-address"))
-                        text += `\nfunc-ptr: 0x${token.getAttribute("data-func-address")}`
-
-                    if (text.length == 0)
+                    if (lines.length == 0)
                         return
 
                     popup.style.display = null
-                    popup.innerText = text
+                    popup.innerText = lines.join("\n")
 
-                    bbox = token.getBoundingClientRect()
-                    pbbox = popup.getBoundingClientRect()
-                    popup.style.top = `${bbox.y - pbbox.height}px`
-                    popup.style.left = `${Math.max(1, bbox.x - pbbox.width / 2)}px`
+                    const bbox = token.getBoundingClientRect()
+                    const pbbox = popup.getBoundingClientRect()
+
+                    const top = Math.max(1, bbox.y - pbbox.height - 8)
+                    const left = Math.max(1, bbox.x + (bbox.width - pbbox.width) / 2)
+
+                    popup.style.top = `${top}px`
+                    popup.style.left = `${left}px`
                 })
 
                 token.addEventListener("mouseleave", _ => popup.style.display = "none")

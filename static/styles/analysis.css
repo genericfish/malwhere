@@ -17,6 +17,12 @@
     cursor: pointer;
 }
 
+.token.FuncNameToken[data-func-address]:hover {
+    text-decoration: underline;
+    cursor: pointer;
+    outline: 1px dashed goldenrod;
+}
+
 .token.TypeToken {
     color: cadetblue;
 }
