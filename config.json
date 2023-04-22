@@ -1,12 +1,12 @@
 {
     "binary": {
-        "output": "./files"
+        "output": "./ghidra/bin"
     },
     "analysis": {
-        "output": "./analyzed"
+        "output": "./ghidra/output"
     },
     "ghidra": {
-        "path": "C:\\Users\\Brandon\\Documents\\Sandbox\\ghidra_10.2.3_PUBLIC",
+        "path": "/path/to/ghidra",
         "script": {
             "path": "./scripts",
             "files": [
@@ -17,7 +17,7 @@
         },
         "project": {
             "name": "malwhere",
-            "path": "./ghidra"
+            "path": "./ghidra/projects"
         }
     }
 }
