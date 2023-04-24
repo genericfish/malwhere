@@ -22,9 +22,15 @@ from ghidra.program.model.pcode import PcodeOp
 
 class ASTNode(object):
     def __init__(self, clang_token):
-        self.type = re.search(r'\.Clang(\w+)\'', str(type(clang_token))).groups()[0]
+        tokenType = re.search(r'\.Clang(\w+)\'', str(type(clang_token))).groups()[0]
+        tokenType = tokenType.replace("Token", "")
 
+        self.type = tokenType
         self.value = str(clang_token)
+
+        if (type(clang_token) == ClangCommentToken):
+            return
+
         self.props = {}
 
         min_address = clang_token.getMinAddress()
@@ -47,6 +53,9 @@ class ASTNode(object):
                 address = varnode.getPCAddress()
                 if address:
                     self.props["var-address"] = str(address)
+
+            if high:
+                self.data_type = high.getDataType().getDisplayName()
 
         if type(clang_token) == ClangFuncNameToken:
             # "ClangFuncNameToken unused field hfunc"
