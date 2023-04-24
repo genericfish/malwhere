@@ -29,13 +29,13 @@
                     <span class="address">(entry: {{ entry }})</span>
                 </div>
                 {%- for token in data["tokens"] -%}
-                    {%- if token["type"] == "SyntaxToken" and token["value"] == "{" -%}
+                    {%- if token["type"] == "Syntax" and token["value"] == "{" -%}
                         {% set indent.value = indent.value + 1 %}
                     {%- endif -%}
 
                     {%- if loop.index + 1 < data["tokens"]|length -%} 
                         {% set next = data["tokens"][loop.index + 1] %}
-                        {%- if next["type"] == "SyntaxToken" and next["value"] == "}" -%}
+                        {%- if next["type"] == "Syntax" and next["value"] == "}" -%}
                             {% set indent.value = indent.value - 1 %}
                         {%- endif -%}
                     {%- endif -%}

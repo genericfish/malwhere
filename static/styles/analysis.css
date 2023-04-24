@@ -4,30 +4,30 @@
     border: 1px solid white;
 }
 
-.token.VariableToken {
+.token.Variable {
     color: olive;
 }
 
-.token.FuncNameToken {
+.token.FuncName {
     color: goldenrod;
 }
 
-.token.FuncNameToken[data-func-address] {
+.token.FuncName[data-func-address] {
     text-decoration: underline;
     cursor: pointer;
 }
 
-.token.FuncNameToken[data-func-address]:hover {
+.token.FuncName[data-func-address]:hover {
     text-decoration: underline;
     cursor: pointer;
     outline: 1px dashed goldenrod;
 }
 
-.token.TypeToken {
+.token.Type {
     color: cadetblue;
 }
 
-.token.OpToken {
+.token.Op {
     color: indianred;
 }
 
@@ -35,7 +35,7 @@
     color: orange;
 }
 
-.token.CommentToken {
+.token.Comment {
     color: grey;
 }
 
