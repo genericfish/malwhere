@@ -140,13 +140,10 @@ class Rule {
         this.pattern = ruleLike
         this.type = this.pattern[0].constructor
 
+        this.length = this.pattern.length
         this.optional = new OptionalRule(this)
 
         Object.freeze(this)
-    }
-
-    get length() {
-        return this.pattern.length
     }
 }
 
@@ -184,6 +181,7 @@ class Statement {
 
         this.name = name
         this.rules = rules
+
         this.numRequiredRules = rules.reduce((acc, rule) => acc + (rule.constructor === Rule), 0)
 
         Object.freeze(this)
@@ -211,6 +209,8 @@ class Group {
     constructor (rule, tokens) {
         this.rule = rule
         this.tokens = tokens
+        this.name = rule.name
+        this.length = this.tokens.length
 
         Object.freeze(this)
     }
@@ -228,14 +228,6 @@ class Group {
 
     toString() {
         return this.tokens.map(token => token.value).join('')
-    }
-
-    get name() {
-        return this.rule.name
-    }
-
-    get length() {
-        return this.tokens.length
     }
 }
 
@@ -286,6 +278,7 @@ class Parser {
         this.cursor = 0
         this.skipEmpty = skipEmpty
         this.skipComments = skipComments
+        this.length = this.tokens.length
 
         if (skipEmpty)
             this.tokens = this.tokens.filter(token => token.type !== TokenType.Break && token.value.trim().length)
@@ -294,6 +287,8 @@ class Parser {
             this.tokens = this.tokens.filter(token => token.type !== TokenType.Comment)
 
         this._stmt_end_token = new TokenExp(TokenType.Syntax, /^[;|{|}]/)
+
+        Object.seal(this)
     }
 
     match(statementLike) {
@@ -319,31 +314,64 @@ class Parser {
         let closeStatement = false
 
         for (let cursor = 0; i < numRules && this.peek(cursor); cursor++) {
-            const rule = stmt.rules[i]
-            const match = this.#matchRule(rule, cursor)
+            let rule = stmt.rules[i]
 
-            if (match) {
-                cursor += rule.length +1
-                groups.push(match)
+            if (rule.constructor === Rule) {
+                const match = this.#matchRule(rule, cursor)
 
-                i++
+                if (match) {
+                    cursor += rule.length + 1
+                    groups.push(match)
+
+                    i++
+                }
+            } else {
+                let rules = []
+                for (let j = i; j < stmt.rules.length; j++) {
+                    rule = stmt.rules[j]
+                    rules.push(rule)
+
+                    if (rule.constructor === Rule)
+                        break
+                }
+
+                for (const [j, rule] of Object.entries(rules)) {
+                    const match = this.#matchRule(rule, cursor)
+
+                    if (match) {
+                        cursor += rule.length + 1
+                        groups.push(match)
+
+                        i += Number(j) + 1
+
+                        break
+                    }
+                }
             }
 
             if (closeStatement)
-                return
+                break
 
             closeStatement = this.statementEnd(cursor)
         }
 
-        if (i < stmt.numRequiredRules)
+        if (groups.length < stmt.numRequiredRules)
             return null
 
         return new MatchResults(groups)
     }
 
     #matchRule(rule, n=0) {
-        if (rule.type === Rule)
-            return rule.pattern.reduce((acc, rule) => acc ?? this.#matchRule(rule, n), null)
+        if (rule.type === Rule || rule.type === OptionalRule) {
+            for (const pattern of rule.pattern) {
+                const result = this.#matchRule(pattern, n)
+
+                if (result)
+                    return result
+            }
+
+            return null
+        }
 
         if (!this.peek(n + rule.length))
             return null
@@ -379,9 +407,6 @@ class Parser {
     }
 
     peek(n=1) {
-        if (this.cursor + n >= this.length)
-            return null
-
         return this.tokens[this.cursor + n]
     }
 
@@ -393,10 +418,6 @@ class Parser {
         while (this.next())
             if (this.statementEnd())
                 return this.next()
-    }
-
-    get length() {
-        return this.tokens.length
     }
 }
 
@@ -456,7 +477,7 @@ const stream_close = new Rule(
 
 const sm = new Rule("sm", new TokenExp(TokenType.Syntax, /^;/))
 
-const stream_stmt = new Statement("stream_statement", assignment, stream_io_operator, stream, stream_close, sm)
+const stream_stmt = new Statement("stream_statement", assignment.optional, stream_io_operator, stream, stream_close, sm)
 
 fetch("/ghidra/output/sHWY0wnFVvWZ.json")
 .then(response => response.json())
@@ -471,11 +492,8 @@ fetch("/ghidra/output/sHWY0wnFVvWZ.json")
             if (match) {
                 parser.nextStatement()
 
-                // const [op, stream, variable, sem] = match.groups.map(group => group.replace().tokens.map(token => token.value).join(''))
-                const result = match.replace().reorder(assignment, stream, stream_io_operator, stream_close, sm)
+                const result = match.replace().reorder(assignment.optional, stream, stream_io_operator, stream_close)
                 console.log(String(result))
-
-                // console.log("Found:", stream, op, variable, sem)
             }
         } while (parser.next())
     }
