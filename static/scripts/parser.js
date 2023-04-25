@@ -8,6 +8,7 @@ const TokenType = {
     Syntax: "Syntax",
     Type: "Type",
     Variable: "Variable",
+    Same: "Same"
 }
 
 const TokenProperty = {
@@ -59,8 +60,23 @@ const Replacement = {
                 throw "Replacement.Modify(*) expected valid TokenProperty"
         }
     },
-    Expand: (...tokens) => _ => tokens,
-    Custom: callback => ghidraToken => callback(ghidraToken)
+    Expand: (...tokens) => ghidraToken => flatten(tokens.map(token => token.type == TokenType.Same ? token.replace(ghidraToken) : token)),
+    Custom: callback => ghidraToken => callback(ghidraToken),
+    Same: _ => { throw "TokenReplacement.Same should not be called" }
+}
+
+class GhidraToken {
+    constructor (type, value, dataType) {
+        this.type = type
+        this.value = value
+
+        if (dataType)
+            this.dataType = dataType
+    }
+
+    static Same(replacementMethod=Replacement.Keep()) {
+        return new TokenExp(TokenType.Same, null, replacementMethod)
+    }
 }
 
 /**
@@ -174,6 +190,20 @@ class Statement {
     }
 }
 
+function flatten(array) {
+    return array.reduce((acc, e) => {
+        if (!acc)
+            return acc
+
+        if (Array.isArray(e))
+            acc.push(...e)
+        else
+            acc.push(e)
+
+        return acc
+    }, [])
+}
+
 /**
  * Groups contain the matched Ghidra tokens for a given Rule.
  */
@@ -186,7 +216,13 @@ class Group {
     }
 
     replace() {
-        const replaced = this.tokens.map((ghidraToken, i) => this.rule.pattern[i].replace(ghidraToken)).filter(v => v)
+        // const replaced = this.tokens.map((ghidraToken, i) => this.rule.pattern[i].replace(ghidraToken)).filter(v => v)
+        const replaced = flatten(
+                            this.tokens
+                                .map((ghidraToken, i) => this.rule.pattern[i].replace(ghidraToken))
+                                .filter(v => v)
+                            )
+
         return new Group(this.rule, replaced)
     }
 
@@ -364,6 +400,12 @@ class Parser {
     }
 }
 
+const assignment = new Rule(
+    "assignment_operator",
+    new TokenExp(TokenType.Variable, /.*/),
+    new TokenExp(TokenType.Op, /=/)
+)
+
 const stream_io_operator = new Rule(
     "stream_io_operator",
     new Rule(
@@ -400,7 +442,11 @@ const stream_close = new Rule(
     "stream_close",
     new Rule(
         "endl",
-        new TokenExp(TokenType.Variable, /PTR_endl<.*>.*/, Replacement.Modify(TokenProperty.Value, "std::endl"))
+        new TokenExp(TokenType.Variable, /PTR_endl<.*>.*/, Replacement.Expand(
+            new GhidraToken(TokenType.Syntax, "std"),
+            new GhidraToken(TokenType.Op, "::"),
+            GhidraToken.Same(Replacement.Modify(TokenProperty.Value, "endl"))
+        )),
     ),
     new Rule(
         "wc_var",
@@ -410,7 +456,7 @@ const stream_close = new Rule(
 
 const sm = new Rule("sm", new TokenExp(TokenType.Syntax, /^;/))
 
-const stream_stmt = new Statement("stream_statement", stream_io_operator, stream, stream_close, sm)
+const stream_stmt = new Statement("stream_statement", assignment, stream_io_operator, stream, stream_close, sm)
 
 fetch("/ghidra/output/sHWY0wnFVvWZ.json")
 .then(response => response.json())
@@ -426,7 +472,7 @@ fetch("/ghidra/output/sHWY0wnFVvWZ.json")
                 parser.nextStatement()
 
                 // const [op, stream, variable, sem] = match.groups.map(group => group.replace().tokens.map(token => token.value).join(''))
-                const result = match.replace().reorder(stream, stream_io_operator, stream_close, sm)
+                const result = match.replace().reorder(assignment, stream, stream_io_operator, stream_close, sm)
                 console.log(String(result))
 
                 // console.log("Found:", stream, op, variable, sem)
