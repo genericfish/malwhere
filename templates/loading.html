@@ -51,7 +51,7 @@
         let count = 0
         const ellipsis = document.getElementById("ellipsis")
         function check() {
-            fetch("/api/1.0/exists/{{ submission_id }}")
+            fetch("/api/v1/submission/exists/{{ submission_id }}")
                 .then(response => response.json())
                 .then(data => data != null && data.exists ? location.reload() : 0)
 
