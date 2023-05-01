@@ -125,11 +125,12 @@ print(programAddress)
 prog = FlatProgramAPI(currentProgram, monitor)
 decomp = FlatDecompilerAPI(prog)
 currentFunction = prog.getFunctionContaining(programAddress)
-file = open("ghidra/bin/controlFlow.txt", "w")
-file.write("# " + str(currentFunction) + '\n')
-DecompiledFuncStr = decompiledCurrentFunctionString(currentFunctionArg=currentFunction)
-depth = 2
-visitedDict = FunctionsVisitedDict()
-getFunctionFlow(DecompiledFuncStr, depth, visitedDict, file)
-file.close()
+output_dir = os.environ.get("MALWHERE_ANALYSIS_PATH", os.path.dirname(os.path.realpath(__file__)))
+prog_name = prog.getProgramFile().getName() if prog.getProgramFile() else "ast"
+with open(os.path.join(output_dir, "{}_control_flow.txt".format(prog_name)), "w") as file:
+    file.write("# " + str(currentFunction) + '\n')
+    DecompiledFuncStr = decompiledCurrentFunctionString(currentFunctionArg=currentFunction)
+    depth = 2
+    visitedDict = FunctionsVisitedDict()
+    getFunctionFlow(DecompiledFuncStr, depth, visitedDict, file)
 

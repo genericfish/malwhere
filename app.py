@@ -101,8 +101,8 @@ def analysis(submission_id):
     if analysis_file_path.exists():
         functions = None
 
-        file = open("ghidra/bin/controlFlow.txt", "r")
-        controlFlow = file.read()
+        with open(ghidra.analysis_path.joinpath(f"{submission_id}_control_flow.txt"), 'r') as file:
+            controlFlow = file.read()
 
         with open(analysis_file_path.absolute(), "r") as data:
             functions = json.load(data)

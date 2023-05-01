@@ -12,6 +12,7 @@
             "files": [
                 "CleanIO.py",
                 "Rename.py",
+                "ControlFlow.py",
                 "ExportTokens.py"
             ]
         },
