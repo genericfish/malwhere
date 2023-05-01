@@ -98,11 +98,14 @@ def analysis(submission_id):
     if analysis_file_path.exists():
         functions = None
 
+        file = open("ghidra/bin/controlFlow.txt", "r")
+        controlFlow = file.read()
+
         with open(analysis_file_path.absolute(), "r") as data:
             functions = json.load(data)
 
         return render_template(
-            "analysis.html", submission_id=submission_id, functions=functions
+            "analysis.html", submission_id=submission_id, functions=functions, controlFlow=controlFlow
         )
 
     return render_template("loading.html", submission_id=submission_id)

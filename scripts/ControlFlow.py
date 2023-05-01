@@ -106,8 +106,9 @@ def getFunctionFlow(DecompiledFuncStr, depth, visitedDict, file):
             DecompiledFuncStr = decompiledCurrentFunctionString(calledFuncName[1])
             if visitedDict[calledFuncName[1]] == 0:
                 visitedDict[calledFuncName[1]] = 1
-                getFunctionFlow(DecompiledFuncStr,depth+1, visitedDict, file)
                 file.write(depth*'#' + ' ' + calledFuncName[0] + '\n')
+                getFunctionFlow(DecompiledFuncStr,depth+1, visitedDict, file)
+                
                 
             else:
                 return

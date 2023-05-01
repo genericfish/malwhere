@@ -16,6 +16,8 @@
     </nav>
     <div class="container">
         <ul id="function-tree">
+            <li><button type="button" class="ControlFlow" onclick="showControlFlow()">View Control Flow Graph</button></li>
+            <br>
         {% for entry, data in functions.items() %}
             <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
         {% endfor %}
@@ -56,6 +58,26 @@
             {%- endfor -%}
         </div>
     </div>
+    <div id="GraphPopup" style="display: none;" class="ControlFlowGraph">
+        <button style="bottom:0;"type="button" class="ControlFlow" onclick="showControlFlow()">Exit Control Flow Graph</button>
+        <div class="markmap"><script type="text/template">
+            {{ controlFlow }}
+            </script></div>
+    </div>
+    <script>
+        window.markmap = {
+          autoLoader: { manual: true },
+        };
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader"></script>
+        <script>
+        // Render in 5s
+        setTimeout(() => {
+          markmap.autoLoader.renderAll();
+        }, 1000);
+        </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@latest"></script>
 
     <script>
         const functions = document.getElementsByClassName("function")
@@ -148,6 +170,17 @@
 
             setActiveHash()
         })
+        function showControlFlow() {
+            
+            const elem = document.getElementById("GraphPopup");
+            if (elem.style.display != "none") {
+                elem.style.display = "none";
+            } else {
+                elem.style.display = "block";
+            }
+            
+
+        }
 
     </script>
 </body>
