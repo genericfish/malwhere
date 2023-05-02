@@ -6,12 +6,14 @@
         "output": "./ghidra/output"
     },
     "ghidra": {
-        "path": "/path/to/ghidra",
+        "path": "C:\\Users\\jiabe\\Downloads\\ghidra_10.2.3_PUBLIC_20230208\\ghidra_10.2.3_PUBLIC",
         "script": {
             "path": "./scripts",
             "files": [
                 "CleanIO.py",
                 "Rename.py",
+                "ControlFlow.py",
+                "Print.py",
                 "ExportTokens.py"
             ]
         },

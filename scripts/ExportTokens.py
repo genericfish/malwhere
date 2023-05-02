@@ -41,9 +41,8 @@ class ASTNode(object):
         if max_address:
             self.props["max-address"] = str(max_address)
 
-        varnode = clang_token.getVarnode()
-
         if type(clang_token) == ClangVariableToken:
+            varnode = clang_token.getVarnode()
             high = clang_token.getHighVariable()
 
             if varnode:
@@ -54,8 +53,13 @@ class ASTNode(object):
                 if address:
                     self.props["var-address"] = str(address)
 
+                if high and high.getSymbol():
+                    storage = high.getSymbol().getStorage()
+                    self.props["var-storage"] = str(storage)
+
             if high:
                 self.data_type = high.getDataType().getDisplayName()
+
 
         if type(clang_token) == ClangFuncNameToken:
             # "ClangFuncNameToken unused field hfunc"

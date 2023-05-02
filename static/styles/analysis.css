@@ -47,18 +47,28 @@
 
 #function-tree {
     max-width: 250px;
-    max-height: calc(100vh - 8rem);
-    overflow: auto;
-    list-style-type: none;
-    line-height: 1.25rem;
-
     border: 1px solid white;
-    margin: 0;
-    padding: 1.25rem;
 }
 
+#function-tree ul {
+    list-style-type: none;
+    line-height: 1.25rem;
+    margin: 0;
+    padding: 1.25rem;
+    max-height: calc(100vh - 12rem);
 
-#function-tree>li {
+    overflow: auto;
+}
+
+#function-tree .actions {
+    max-height: 8rem;
+}
+
+#function-tree .actions .ControlFlow {
+    margin-bottom: 1ex;
+}
+
+#function-tree ul>li {
     color: cornflowerblue;
     cursor: pointer;
 }
@@ -66,7 +76,6 @@
 #function-tree>li:hover {
     color: lightblue;
 }
-
 
 .function {
     width: 80vw;
@@ -81,4 +90,81 @@
     font-size: 2rem;
     display: block;
     word-wrap: break-word;
+}
+
+.ControlFlow {
+    background: lightcoral !important;
+    color: black !important;
+    font-weight: bold;
+    border: 1px solid white;
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+}
+
+.ControlFlow.Collapse {
+    width: auto;
+
+    padding: 0;
+    margin: 0;
+    line-height: 1ex;
+}
+
+#SEPopup fieldset,
+#SEResults fieldset {
+    margin: 1em;
+}
+
+#SEPopup .ControlFlow.Collapse {
+    padding: 1ex 2em;
+    margin: 1em;
+}
+
+.ControlFlow:hover {
+    color: white !important;
+}
+
+.modal {
+    position: absolute;
+    width: 80%;
+    min-height: 10em;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.modal button.exit {
+    border: none;
+    border-bottom: 1px solid white;
+    cursor: pointer;
+}
+
+.markmap {
+    background: black;
+    height: 80%;
+}
+
+.markmap>svg {
+    width: 100%;
+    height: 100%;
+    user-select: none;
+}
+
+#GraphPopup {
+    height: 80%;
+}
+
+#GraphPopup,
+#SEPopup,
+#SEResults {
+    border: 1px solid white;
+    background: black;
+}
+
+#SEOutput {
+    display: flex;
+}
+
+#SEOutput > div {
+    margin: 0 1em;
 }
