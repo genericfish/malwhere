@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 
 from malwhere import Config, Ghidra, analyze
 
-
+# flask --app app.py run
 # Load config
 cfg = Config()
 
@@ -97,6 +97,9 @@ def analysis(submission_id):
     if analysis_file_path.exists():
         functions = None
 
+        with open("ghidra/bin/danger.json", "r") as programCapabilitiesData:
+            programCapabilities = json.load(programCapabilitiesData)
+
         with open(ghidra.analysis_path.joinpath(f"{submission_id}_control_flow.txt"), 'r') as file:
             controlFlow = file.read()
 
@@ -107,7 +110,12 @@ def analysis(submission_id):
             decomp = file.read()
 
         return render_template(
-            "analysis.html", submission_id=submission_id, functions=functions, controlFlow=controlFlow, decomp=decomp
+            "analysis.html", 
+            submission_id=submission_id, 
+            functions=functions, 
+            controlFlow=controlFlow,
+            decomp=decomp,
+            programCapabilities=programCapabilities
         )
 
     return render_template("loading.html", submission_id=submission_id)

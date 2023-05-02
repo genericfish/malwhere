@@ -43,3 +43,84 @@ input[type="file"] {
     padding: .5rem 1rem;
     cursor: pointer;
 }
+
+
+.ControlFlow {
+    background-color: #f44336;
+    font-weight: bold;
+    border: 1px solid white;
+    border-radius: 0;
+    margin: 0 auto;
+    text-align: center;
+    width: 100%;
+}
+
+.ProgramCapabilities {
+    background-color: rgb(95, 160, 127);
+    font-weight: bold;
+    border: 1px solid white;
+    border-radius: 0;
+    margin: 0 auto;
+    text-align: center;
+    width: 100%;
+}
+
+#GraphPopup:hover {
+    color: white;
+}
+
+#GraphPopup {
+    position: absolute; 
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    width: 80%;
+    border: 1px solid white;
+    background-color: black;
+}
+
+#CapabilitiesPopup:hover {
+    color: white;
+}
+
+#CapabilitiesPopup {
+    position: absolute; 
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    width: 80%;
+    
+    border: 1px solid white;
+    background-color: black;
+}
+
+.markmap {
+    /* position: absolute; 
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%); */
+    /* width: 100%;
+    height: 100%; */
+    background-color: black;
+  }
+
+.markmap > svg {
+    width: 100%;
+    height: 80vh;
+  }
+
+.capabilitiesColumns {
+    height: 80vh;
+    display: flex;
+    flex-flow: row;
+    
+    
+}
+
+.capabilitiesColumnsItem {
+    overflow-y:auto;
+    overflow-x:auto;
+    flex:1;
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+}

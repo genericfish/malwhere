@@ -20,6 +20,7 @@
                 <button class="ControlFlow" onclick="showControlFlow()">View Control Flow Graph</button>
                 <button class="ControlFlow" onclick="showSE()">Concolic Execution</button>
                 <button type="button" class="ControlFlow" id="SaveButton" data-code="{{ decomp }}" onclick="save()">Download Decompiled Functions</button>
+                <button type="button" class="ProgramCapabilities" onclick="showProgramCapabilities()">View Program Capabilities</button>
             </div>
             <ul>
               <br>
@@ -34,7 +35,6 @@
               {% endfor %}
           </ul>
         </div>
-
         <div id="function-code">
             {% set indent = namespace(value=0) %}
             {%- for entry, data in functions.items() -%}
@@ -136,6 +136,21 @@
             <div id="SEOutput"></div>
         </fieldset>
     </div>
+    <div id="CapabilitiesPopup" style="display: none;" class="ControlFlowGraph">
+        <button style="bottom:0;"type="button" class="ProgramCapabilities" onclick="showProgramCapabilities()">Exit Program Capabilities</button>
+        <div class="capabilitiesColumns">
+        {%- for key in programCapabilities.keys() -%}
+            <div class ="capabilitiesColumnsItem" >
+                <center style="color:goldenrod;"><h3>{{ key }}</h3></center>
+                {%- for value in programCapabilities[key] -%}
+                <center><p>{{ value }}</p></center>
+                {%- endfor -%}
+
+            </div>
+        {%- endfor -%}
+        </div>
+    </div>
+
     <script>
         window.markmap = {
             autoLoader: { manual: true },
@@ -148,9 +163,7 @@
 
     
     <script>
-        setTimeout(() => {
-            markmap.autoLoader.renderAll()
-        }, 1000);
+        setTimeout(_ => markmap.autoLoader.renderAll(), 1000);
     </script>
 
     <script>
@@ -295,6 +308,7 @@
         const showControlFlow = toggleElement("GraphPopup")
         const showSE = toggleElement("SEPopup")
         const toggleSEResults = toggleElement("SEResults")
+        const showProgramCapabilities = showProgramCapabilities("CapabilitiesPopup")
 
         function showSEResults(data, start, end, avoid, registers) {
             toggleSEResults()
