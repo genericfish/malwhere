@@ -15,8 +15,14 @@
         <div id="program">analyze: {{ submission_id }}</div>
     </nav>
     <div class="container">
+        <!-- <button id="save-button" onclick="saveMarkmap()">Save Markmap</button> -->
+
         <ul id="function-tree">
             <li><button type="button" class="ControlFlow" onclick="showControlFlow()">View Control Flow Graph</button></li>
+            <br>
+            <li>
+                <button type="button" className="savebtn" class="savebtn" id="{{ decomp }}" onclick="save()">Download Decompiled Functions</button>
+            </li>
             <br>
         {% for entry, data in functions.items() %}
             <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
@@ -70,11 +76,19 @@
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin = "anonymous" referrerpolicy = "no-referrer"> </script>
+
+    
     <script>
         // Render in 5s
         setTimeout(() => {
             markmap.autoLoader.renderAll();
-        }, 1000);
+        }, 5000);
+        
+        
+
     </script>
 
     <script>
@@ -179,7 +193,23 @@
             
 
         }
+        function save() {
+            const data = document.getElementsByTagName("button")[1].id;
+            console.log(data);
+            var blob = new Blob([data], {
+            type: "text/plain;charset=utf-8",
+            });
+            saveAs(blob, "decompiled_code.txt");
+        }
+        
 
+        // function saveMarkmap() {
+        //     const markmapSvg = document.querySelector('.markmap svg');
+        //     const blob = new Blob([markmapSvg.outerHTML], {type: "image/svg+xml;charset=utf-8"});
+        //     saveAs(blob, "markmap.svg");
+        //     }
+
+        
     </script>
 </body>
 </html>
