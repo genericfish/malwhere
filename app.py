@@ -11,7 +11,7 @@ from flask import Flask, request, redirect, render_template, url_for, jsonify, a
 
 from werkzeug.utils import secure_filename
 
-from malwhere import Config, Ghidra
+from malwhere import Config, Ghidra, analyze
 
 
 # Load config
@@ -25,10 +25,6 @@ binary_path = partial(Path, cfg.get("binary/output"))
 binary_path().mkdir(parents=True, exist_ok=True)
 
 ghidra = Ghidra(cfg)
-
-
-def timestamp_ms():
-    return round(time.time() * 1000)
 
 
 def flash(message, category="error", redirect_url="/", code=302):
@@ -116,17 +112,37 @@ def analysis(submission_id):
     return render_template("loading.html", submission_id=submission_id)
 
 
-@app.route("/api/v1/submission/<endpoint>/<submission_id>")
+@app.route("/api/v1/submission/<endpoint>/<submission_id>", methods=["POST", "GET"])
 def api_exists(endpoint, submission_id):
+    exists = ghidra.analysis_path.joinpath(f"{secure_filename(submission_id)}.json").exists()
+
     match endpoint:
         case "data":
             return send_from_directory(ghidra.analysis_path, f"{submission_id}.json")
 
         case "exists":
-            submission_id = secure_filename(submission_id)
-            resp = {"exists": ghidra.analysis_path.joinpath(f"{submission_id}.json").exists()}
+            resp = {"exists": exists}
 
             return jsonify(resp)
+        
+        case "concolic":
+            if request.method == "GET":
+                return redirect("/")
+
+            if exists:
+                binary = binary_path(secure_filename(submission_id))
+                data = request.get_json()
+                state = analyze(binary.absolute(), data["start"], data["end"], data["avoid"])
+
+                if not state:
+                    return abort(408)
+
+                resp = {}
+
+                for reg in data["registers"]:
+                    resp[reg] = state.solver.eval_upto(state.regs.get(reg), 10)
+
+                return jsonify(resp)
 
         case _:
             return abort(404)

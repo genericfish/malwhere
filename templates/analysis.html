@@ -15,21 +15,26 @@
         <div id="program">analyze: {{ submission_id }}</div>
     </nav>
     <div class="container">
-        <!-- <button id="save-button" onclick="saveMarkmap()">Save Markmap</button> -->
+        <div id="function-tree">
+            <div class="actions">
+                <button class="ControlFlow" onclick="showControlFlow()">View Control Flow Graph</button>
+                <button class="ControlFlow" onclick="showSE()">Concolic Execution</button>
+                <button type="button" className="savebtn" class="savebtn" id="SaveButton" data-code="{{ decomp }}" onclick="save()">Download Decompiled Functions</button>
+            </div>
+            <ul>
+              <br>
+              <h3>Global Functions</h3>
+              {% for entry, data in functions.items() if data["namespace"]=="Global" %}
+                  <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
+              {% endfor %}
+              <br>
+              <h3 style="width:120%">External Functions</h3>
+              {% for entry, data in functions.items() if not data["namespace"]=="Global" %}
+                  <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
+              {% endfor %}
+          </ul>
+        </div>
 
-        <ul id="function-tree">
-            <li><button type="button" class="ControlFlow" onclick="showControlFlow()">View Control Flow Graph</button></li>
-            <br>
-            <h3>Global Functions</h3>
-            {% for entry, data in functions.items() if data["namespace"]=="Global" %}
-                <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
-            {% endfor %}
-            <br>
-            <h3 style="width:120%">External Functions</h3>
-            {% for entry, data in functions.items() if not data["namespace"]=="Global" %}
-                <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
-            {% endfor %}
-        </ul>
         <div id="function-code">
             {% set indent = namespace(value=0) %}
             {%- for entry, data in functions.items() -%}
@@ -66,16 +71,75 @@
             {%- endfor -%}
         </div>
     </div>
-    <div id="GraphPopup" style="display: none;" class="ControlFlowGraph">
-        <button style="bottom:0;"type="button" class="ControlFlow" onclick="showControlFlow()">Exit Control Flow Graph</button>
-        <div class="markmap"><script type="text/template">
-            {{ controlFlow }}
-            </script></div>
+    <div id="GraphPopup" class="modal" style="visibility: hidden;">
+        <button class="ControlFlow exit"  onclick="showControlFlow()">Close</button>
+        <div class="markmap"><script type="text/template">{{ controlFlow }}</script></div>
+    </div>
+    <div id="SEPopup" class="modal" style="visibility: hidden;">
+        <div>
+            <fieldset>
+                <legend>Concolic Execution Setup</legend>
+                <fieldset>
+                    <legend>Address</legend>
+                    <div class="form-group">
+                        <label for="se-start-address">&nbsp;&nbsp;Start Address: </label>
+                        <input autocomplete="false" type="text" name="start" id="se-start-address">
+                        <button class="ControlFlow Collapse" onclick="selectToken('se-start-address')">Select Token</button>
+                        <button class="ControlFlow Collapse" onclick="useEntryAsStart()">Function Entry Point</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="se-start-address">&nbsp;&nbsp;&nbsp;&nbsp;End Address: </label>
+                        <input autocomplete="false" type="text" name="end" id="se-end-address">
+                        <button class="ControlFlow Collapse" onclick="selectToken('se-end-address')">Select Token</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="se-start-address">Avoid Addresses: </label>
+                        <input autocomplete="false" type="text" name="avoid" id="se-avoid-addresses">
+                        <button class="ControlFlow Collapse" onclick="selectToken('se-avoid-addresses')">Select Token</button>
+                        <button class="ControlFlow Collapse" onclick="selectToken('se-avoid-addresses', true)">Add Token</button>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend>Registers to Concolically Solve</legend>
+                    <div>
+                        <fieldset>
+                            <legend>64-bit</legend>
+                            <label for="register-rdi"><input class="register" autocomplete="false" type="checkbox" name="rdi" id="register-rdi">rdi</label>
+                            <label for="register-rsi"><input class="register" autocomplete="false" type="checkbox" name="rsi" id="register-rsi">rsi</label>
+                            <label for="register-rdx"><input class="register" autocomplete="false" type="checkbox" name="rdx" id="register-rdx">rdx</label>
+                            <label for="register-rcx"><input class="register" autocomplete="false" type="checkbox" name="rcx" id="register-rcx">rcx</label>
+                            <label for="register-r8"><input class="register" autocomplete="false" type="checkbox" name="r8" id="register-r8">r8</label>
+                            <label for="register-r9"><input class="register" autocomplete="false" type="checkbox" name="r9" id="register-r9">r9</label>
+                        </fieldset>
+                        <fieldset>
+                            <legend>32-bit</legend>
+                            <label for="register-edi"><input class="register" autocomplete="false" type="checkbox" name="edi" id="register-edi">edi</label>
+                            <label for="register-esi"><input class="register" autocomplete="false" type="checkbox" name="esi" id="register-esi">esi</label>
+                            <label for="register-edx"><input class="register" autocomplete="false" type="checkbox" name="edx" id="register-edx">edx</label>
+                            <label for="register-ecx"><input class="register" autocomplete="false" type="checkbox" name="ecx" id="register-ecx">ecx</label>
+                        </fieldset>
+                    </div>
+                </fieldset>
+                <button class="ControlFlow Collapse" onclick="concolic()">Solve</button>
+                <button class="ControlFlow Collapse" onclick="showSE()">Close</button>
+            </fieldset>
+        </div>
+    </div>
+    <div id="SEResults" class="modal" style="visibility: hidden;">
+        <button class="ControlFlow exit"  onclick="toggleSEResults()">Close</button>
+        <fieldset>
+            <legend>Concolic Execution Results</legend>
+            <fieldset>
+                <legend>Parameters</legend>
+                <div id="SEParameters"></div>
+            </fieldset>
+            <div id="SEOutput"></div>
+        </fieldset>
     </div>
     <script>
         window.markmap = {
-          autoLoader: { manual: true },
-        };
+            autoLoader: { manual: true },
+        }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -85,11 +149,50 @@
     
     <script>
         setTimeout(() => {
-            markmap.autoLoader.renderAll();
+            markmap.autoLoader.renderAll()
         }, 1000);
     </script>
 
     <script>
+        function concolic() {
+            const registers = Array.from(document.getElementsByClassName("register"))
+                .reduce((acc, reg) => {
+                    if (reg.checked)
+                        acc.push(reg.getAttribute("name"))
+
+                    return acc
+                }, [])
+
+            const xhr = new XMLHttpRequest()
+            xhr.open("POST", "/api/v1/submission/concolic/sHWY0wnFVvWZ", true)
+            xhr.setRequestHeader('Content-type', 'application/json')
+
+            const startElement = document.getElementById("se-start-address")
+            const endElement = document.getElementById("se-end-address")
+            const avoidElement = document.getElementById("se-avoid-addresses")
+
+            const start = Number(startElement.value)
+            const end = Number(endElement.value)
+            const avoid = avoidElement.value.split(',')
+                .map(e => Number(e))
+                .filter(e => !isNaN(e))
+
+            if (isNaN(start) || isNaN(end))
+                return
+
+            console.log(start, end, avoid, registers)
+
+            xhr.send(JSON.stringify({
+                start: start, end: end, avoid: avoid, registers: registers}))
+
+            xhr.onreadystatechange = _ => {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    showSE()
+                    showSEResults(xhr.responseText, startElement.value, endElement.value, avoidElement.value, registers.join(", "))
+                }
+            }
+        }
+
         const functions = document.getElementsByClassName("function")
         const tokens = document.getElementsByClassName("token")
         const functionTree = document.getElementById("function-tree")
@@ -173,41 +276,100 @@
             for (let func of functionTree.children) {
                 const span = func.children[0]
 
-                func.addEventListener("click", _ => setActiveFunction(span.getAttribute("data-func")))
+                if (span instanceof HTMLSpanElement)
+                    func.addEventListener("click", _ => setActiveFunction(span.getAttribute("data-func")))
             }
 
             window.addEventListener("popstate", _ => setActiveHash())
 
             setActiveHash()
         })
-        function showControlFlow() {
-            
-            const elem = document.getElementById("GraphPopup");
-            if (elem.style.display != "none") {
-                elem.style.display = "none";
-            } else {
-                elem.style.display = "block";
-            }
-            
 
+        const toggleElement = id => _ => {
+            const elem = document.getElementById(id)
+
+            if (elem.style.visibility != "hidden") {
+                elem.style.visibility = "hidden"
+            } else {
+                elem.style.visibility = null
+            }
+        }
+
+        const showControlFlow = toggleElement("GraphPopup")
+        const showSE = toggleElement("SEPopup")
+        const toggleSEResults = toggleElement("SEResults")
+
+        function showSEResults(data, start, end, avoid, registers) {
+            toggleSEResults()
+            const element = document.getElementById("SEOutput")
+            const params = document.getElementById("SEParameters")
+
+            params.innerHTML = `Start: ${start}<br>&nbsp;&nbsp;End: ${end}<br>Avoid: ${avoid || "none"}<br>Solve For: ${registers}`
+
+            for (const child of element.children)
+                element.removeChild(child)
+
+            data = JSON.parse(data)
+
+            for (const [reg, vals] of Object.entries(data)) {
+                const regContainer = document.createElement("div")
+                const regElement = document.createElement("ul")
+                const regTitle = document.createElement("h3")
+                regTitle.innerText = reg
+                regContainer.append(regTitle)
+
+                for (const val of vals) {
+                    const valElement = document.createElement("li")
+                    valElement.innerText = val
+                    regElement.append(valElement)
+                }
+
+                regContainer.append(regElement)
+                element.append(regContainer)
+            }
         }
         function save() {
-            const data = document.getElementsByTagName("button")[1].id;
+            const element = document.getElementById("SaveButton");
+            const data = element.getAttribute("data-code");
             console.log(data);
             var blob = new Blob([data], {
             type: "text/plain;charset=utf-8",
             });
             saveAs(blob, "decompiled_code.txt");
         }
-        
 
-        // function saveMarkmap() {
-        //     const markmapSvg = document.querySelector('.markmap svg');
-        //     const blob = new Blob([markmapSvg.outerHTML], {type: "image/svg+xml;charset=utf-8"});
-        //     saveAs(blob, "markmap.svg");
-        //     }
+        function selectToken(id, concat=false) {
+            const field = document.getElementById(id)
+            showSE()
 
-        
+            document.addEventListener("click", function selector(e) {
+                const element = document.elementFromPoint(e.clientX, e.clientY)
+
+                if (!(element instanceof HTMLSpanElement) || !element.classList.contains('token'))
+                    return
+
+                const address = element.getAttribute("data-var-address")
+
+                if (isNaN(Number(`0x${address}`)))
+                    return
+
+                    if (concat && field.value.length) {
+                        field.value += `, 0x${address}`
+                    } else {
+                    field.value = `0x${address}`
+                }
+
+                document.removeEventListener("click", selector, false)
+                showSE()
+            }, false)
+        }
+
+        function useEntryAsStart() {
+            const hash = window.location.hash
+
+            if (hash)
+                document.getElementById("se-start-address").value = `0x${hash.substr(1)}`
+        }
     </script>
 </body>
 </html>
