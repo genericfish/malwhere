@@ -86,3 +86,14 @@ input[type="file"] {
     
 
   }
+
+  .savebtn {
+    background-color: #f44336;
+    font-weight: bold;
+    border: 1px solid white;
+    border-radius: 0;
+    margin: 0 auto;
+    text-align: center;
+    width: 100%;
+    
+  }
