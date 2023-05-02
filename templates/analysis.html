@@ -15,18 +15,20 @@
         <div id="program">analyze: {{ submission_id }}</div>
     </nav>
     <div class="container">
+        <!-- <button id="save-button" onclick="saveMarkmap()">Save Markmap</button> -->
+
         <ul id="function-tree">
             <li><button type="button" class="ControlFlow" onclick="showControlFlow()">View Control Flow Graph</button></li>
             <br>
-        <h3>Global Functions</h3>
-        {% for entry, data in functions.items() if data["namespace"]=="Global" %}
-            <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
-        {% endfor %}
-        <br>
-        <h3 style="width:120%">External Functions</h3>
-        {% for entry, data in functions.items() if not data["namespace"]=="Global" %}
-            <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
-        {% endfor %}
+            <h3>Global Functions</h3>
+            {% for entry, data in functions.items() if data["namespace"]=="Global" %}
+                <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
+            {% endfor %}
+            <br>
+            <h3 style="width:120%">External Functions</h3>
+            {% for entry, data in functions.items() if not data["namespace"]=="Global" %}
+                <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
+            {% endfor %}
         </ul>
         <div id="function-code">
             {% set indent = namespace(value=0) %}
@@ -74,16 +76,18 @@
         window.markmap = {
           autoLoader: { manual: true },
         };
-        </script>
-        <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader"></script>
-        <script>
-        // Render in 5s
-        setTimeout(() => {
-          markmap.autoLoader.renderAll();
-        }, 1000);
-        </script>
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin = "anonymous" referrerpolicy = "no-referrer"> </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@latest"></script>
+    
+    <script>
+        setTimeout(() => {
+            markmap.autoLoader.renderAll();
+        }, 1000);
+    </script>
 
     <script>
         const functions = document.getElementsByClassName("function")
@@ -187,7 +191,23 @@
             
 
         }
+        function save() {
+            const data = document.getElementsByTagName("button")[1].id;
+            console.log(data);
+            var blob = new Blob([data], {
+            type: "text/plain;charset=utf-8",
+            });
+            saveAs(blob, "decompiled_code.txt");
+        }
+        
 
+        // function saveMarkmap() {
+        //     const markmapSvg = document.querySelector('.markmap svg');
+        //     const blob = new Blob([markmapSvg.outerHTML], {type: "image/svg+xml;charset=utf-8"});
+        //     saveAs(blob, "markmap.svg");
+        //     }
+
+        
     </script>
 </body>
 </html>
