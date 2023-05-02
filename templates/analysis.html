@@ -17,6 +17,7 @@
     <div class="container">
         <ul id="function-tree">
             <li><button type="button" class="ControlFlow" onclick="showControlFlow()">View Control Flow Graph</button></li>
+            <li><button type="button" class="ProgramCapabilities" onclick="showProgramCapabilities()">View Program Capabilities</button></li>
             <br>
         {% for entry, data in functions.items() %}
             <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
@@ -64,6 +65,21 @@
             {{ controlFlow }}
             </script></div>
     </div>
+    <div id="CapabilitiesPopup" style="display: none;" class="ControlFlowGraph">
+        <button style="bottom:0;"type="button" class="ProgramCapabilities" onclick="showProgramCapabilities()">Exit Program Capabilities</button>
+        <div class="capabilitiesColumns">
+        {%- for key in programCapabilities.keys() -%}
+            <div class ="capabilitiesColumnsItem" >
+                <center style="color:goldenrod;"><h3>{{ key }}</h3></center>
+                {%- for value in programCapabilities[key] -%}
+                <center><p>{{ value }}</p></center>
+                {%- endfor -%}
+
+            </div>
+        {%- endfor -%}
+        </div>
+    </div>
+
     <script>
         window.markmap = {
           autoLoader: { manual: true },
@@ -74,7 +90,7 @@
         // Render in 5s
         setTimeout(() => {
           markmap.autoLoader.renderAll();
-        }, 1000);
+        }, 2000);
         </script>
 
     <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@latest"></script>
@@ -177,9 +193,17 @@
                 elem.style.display = "none";
             } else {
                 elem.style.display = "block";
-            }
-            
 
+            }
+        }
+
+        function showProgramCapabilities() {
+            const elem = document.getElementById("CapabilitiesPopup");
+            if (elem.style.display != "none") {
+                elem.style.display = "none";
+            } else {
+                elem.style.display = "block";
+            }
         }
 
     </script>
