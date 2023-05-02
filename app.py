@@ -102,9 +102,11 @@ def analysis(submission_id):
 
         with open(analysis_file_path.absolute(), "r") as data:
             functions = json.load(data)
+        with open("ghidra/output/decompiled_code.txt", "r") as dc:
+            decomp = dc.read()
 
         return render_template(
-            "analysis.html", submission_id=submission_id, functions=functions, controlFlow=controlFlow
+            "analysis.html", submission_id=submission_id, functions=functions, controlFlow=controlFlow, decomp=decomp
         )
 
     return render_template("loading.html", submission_id=submission_id)
