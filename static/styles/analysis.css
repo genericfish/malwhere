@@ -61,7 +61,7 @@
 }
 
 #function-tree .actions {
-    max-height: 4rem;
+    max-height: 8rem;
 }
 
 #function-tree .actions .ControlFlow {

@@ -19,18 +19,18 @@
             <div class="actions">
                 <button class="ControlFlow" onclick="showControlFlow()">View Control Flow Graph</button>
                 <button class="ControlFlow" onclick="showSE()">Concolic Execution</button>
-                <button type="button" className="savebtn" class="savebtn" id="SaveButton" data-code="{{ decomp }}" onclick="save()">Download Decompiled Functions</button>
+                <button type="button" class="ControlFlow" id="SaveButton" data-code="{{ decomp }}" onclick="save()">Download Decompiled Functions</button>
             </div>
             <ul>
               <br>
               <h3>Global Functions</h3>
               {% for entry, data in functions.items() if data["namespace"]=="Global" %}
-                  <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
+                  <li><span class="function-listing" data-func="{{ entry }}">{{ data["name"] }}</span></li>
               {% endfor %}
               <br>
               <h3 style="width:120%">External Functions</h3>
               {% for entry, data in functions.items() if not data["namespace"]=="Global" %}
-                  <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
+                  <li><span class="function-listing" data-func="{{ entry }}">{{ data["name"] }}</span></li>
               {% endfor %}
           </ul>
         </div>
@@ -195,7 +195,6 @@
 
         const functions = document.getElementsByClassName("function")
         const tokens = document.getElementsByClassName("token")
-        const functionTree = document.getElementById("function-tree")
 
         const popup = document.createElement("div")
         popup.classList.add("popup")
@@ -273,11 +272,9 @@
                 token.addEventListener("mouseleave", _ => popup.style.display = "none")
             }
 
-            for (let func of functionTree.children) {
-                const span = func.children[0]
-
-                if (span instanceof HTMLSpanElement)
-                    func.addEventListener("click", _ => setActiveFunction(span.getAttribute("data-func")))
+            const listings = document.getElementsByClassName("function-listing")
+            for (const listing of listings) {
+                listing.addEventListener("click", _ => setActiveFunction(listing.getAttribute("data-func")))
             }
 
             window.addEventListener("popstate", _ => setActiveHash())
@@ -335,7 +332,7 @@
             var blob = new Blob([data], {
             type: "text/plain;charset=utf-8",
             });
-            saveAs(blob, "decompiled_code.txt");
+            saveAs(blob, "{{ submission_id }}_decompiled.txt");
         }
 
         function selectToken(id, concat=false) {

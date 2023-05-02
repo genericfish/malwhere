@@ -13,6 +13,7 @@
                 "CleanIO.py",
                 "Rename.py",
                 "ControlFlow.py",
+                "Print.py",
                 "ExportTokens.py"
             ]
         },
