@@ -18,7 +18,13 @@
         <ul id="function-tree">
             <li><button type="button" class="ControlFlow" onclick="showControlFlow()">View Control Flow Graph</button></li>
             <br>
-        {% for entry, data in functions.items() %}
+        <h3>Global Functions</h3>
+        {% for entry, data in functions.items() if data["namespace"]=="Global" %}
+            <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
+        {% endfor %}
+        <br>
+        <h3 style="width:120%">External Functions</h3>
+        {% for entry, data in functions.items() if not data["namespace"]=="Global" %}
             <li><span data-func="{{ entry }}">{{ data["name"] }}</span></li>
         {% endfor %}
         </ul>
@@ -66,16 +72,18 @@
     </div>
     <script>
         window.markmap = {
-            autoLoader: { manual: true },
+          autoLoader: { manual: true },
         };
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader"></script>
-    <script>
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader"></script>
+        <script>
         // Render in 5s
         setTimeout(() => {
-            markmap.autoLoader.renderAll();
+          markmap.autoLoader.renderAll();
         }, 1000);
-    </script>
+        </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@latest"></script>
 
     <script>
         const functions = document.getElementsByClassName("function")
