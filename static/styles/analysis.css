@@ -45,6 +45,10 @@
     gap: 2rem;
 }
 
+.function-listing:hover {
+    color: lightblue;
+}
+
 #function-tree {
     max-width: 250px;
     border: 1px solid white;
@@ -68,13 +72,9 @@
     margin-bottom: 1ex;
 }
 
-#function-tree ul>li {
+.function-listing {
     color: cornflowerblue;
     cursor: pointer;
-}
-
-#function-tree>li:hover {
-    color: lightblue;
 }
 
 .function {

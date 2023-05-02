@@ -3,7 +3,8 @@
         "output": "./ghidra/bin"
     },
     "analysis": {
-        "output": "./ghidra/output"
+        "output": "./ghidra/output",
+        "suspiciousFunctions": "./functions.json"
     },
     "ghidra": {
         "path": "C:\\Users\\jiabe\\Downloads\\ghidra_10.2.3_PUBLIC_20230208\\ghidra_10.2.3_PUBLIC",
@@ -14,6 +15,7 @@
                 "Rename.py",
                 "ControlFlow.py",
                 "Print.py",
+                "ParseDanger.py",
                 "ExportTokens.py"
             ]
         },

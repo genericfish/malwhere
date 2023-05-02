@@ -56,5 +56,6 @@ class Ghidra:
 
         env = os.environ.copy()
         env["MALWHERE_ANALYSIS_PATH"] = str(self.analysis_path.absolute())
+        env["MALWHERE_FUNCTIONS"] = str(self.cfg.get_path("analysis/suspiciousFunctions").absolute())
 
         subprocess.Popen(command, close_fds=True, shell=True, env=env)

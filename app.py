@@ -97,8 +97,8 @@ def analysis(submission_id):
     if analysis_file_path.exists():
         functions = None
 
-        with open("ghidra/bin/danger.json", "r") as programCapabilitiesData:
-            programCapabilities = json.load(programCapabilitiesData)
+        with open(ghidra.analysis_path.joinpath(f"{submission_id}_danger.json"), 'r') as file:
+            programCapabilities = json.load(file)
 
         with open(ghidra.analysis_path.joinpath(f"{submission_id}_control_flow.txt"), 'r') as file:
             controlFlow = file.read()

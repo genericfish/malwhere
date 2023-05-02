@@ -17,10 +17,10 @@
     <div class="container">
         <div id="function-tree">
             <div class="actions">
-                <button class="ControlFlow" onclick="showControlFlow()">View Control Flow Graph</button>
                 <button class="ControlFlow" onclick="showSE()">Concolic Execution</button>
-                <button type="button" class="ControlFlow" id="SaveButton" data-code="{{ decomp }}" onclick="save()">Download Decompiled Functions</button>
-                <button type="button" class="ProgramCapabilities" onclick="showProgramCapabilities()">View Program Capabilities</button>
+                <button class="ControlFlow" onclick="showControlFlow()">View Control Flow Graph</button>
+                <button class="ControlFlow" id="SaveButton" data-code="{{ decomp }}" onclick="save()">Download Decompiled Functions</button>
+                <button class="ControlFlow" onclick="showProgramCapabilities()">View Program Capabilities</button>
             </div>
             <ul>
               <br>
@@ -136,8 +136,8 @@
             <div id="SEOutput"></div>
         </fieldset>
     </div>
-    <div id="CapabilitiesPopup" style="display: none;" class="ControlFlowGraph">
-        <button style="bottom:0;"type="button" class="ProgramCapabilities" onclick="showProgramCapabilities()">Exit Program Capabilities</button>
+    <div id="CapabilitiesPopup" style="visibility: hidden;" class="ControlFlowGraph">
+        <button class="ControlFlow exit"  onclick="showProgramCapabilities()">Close</button>
         <div class="capabilitiesColumns">
         {%- for key in programCapabilities.keys() -%}
             <div class ="capabilitiesColumnsItem" >
@@ -308,7 +308,7 @@
         const showControlFlow = toggleElement("GraphPopup")
         const showSE = toggleElement("SEPopup")
         const toggleSEResults = toggleElement("SEResults")
-        const showProgramCapabilities = showProgramCapabilities("CapabilitiesPopup")
+        const showProgramCapabilities = toggleElement("CapabilitiesPopup")
 
         function showSEResults(data, start, end, avoid, registers) {
             toggleSEResults()

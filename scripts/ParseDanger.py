@@ -101,7 +101,6 @@ def getCalledFuncsNamesInDecompiledCode(funcStr):
     
 
 def getFunctionFlow(DecompiledFuncStr, depth, visitedDict, FuncData, functionsDict):
-    
     while len(getCalledFuncsNamesInDecompiledCode(DecompiledFuncStr)[1]) > 0:
         for calledFuncName in getCalledFuncsNamesInDecompiledCode(DecompiledFuncStr)[0]:
             
@@ -132,16 +131,21 @@ prog = FlatProgramAPI(currentProgram, monitor)
 decomp = FlatDecompilerAPI(prog)
 currentFunction = prog.getFunctionContaining(programAddress)
 
+output_dir = os.environ.get("MALWHERE_ANALYSIS_PATH", os.path.dirname(os.path.realpath(__file__)))
+prog_name = prog.getProgramFile().getName() if prog.getProgramFile() else "ast"
+
+functions_file = os.environ.get("MALWHERE_FUNCTIONS", os.path.join(os.path.dirname(os.path.realpath(__file__)), "functions.json"))
+
 FuncData = {"Network": [], "Privileges Escalation": [], "Configuration Changes": [], "Download, Compile, or Execute": [], "Encryption": []}
-with open('ghidra/bin/functions.json', 'r') as funcFile:
-    functionsDict = json.load(funcFile)
+with open(functions_file, "r") as file:
+    functionsDict = json.load(file)
     print(functionsDict)
     
 DecompiledFuncStr = decompiledCurrentFunctionString(currentFunctionArg=currentFunction)
 depth = 2
 visitedDict = FunctionsVisitedDict()
 getFunctionFlow(DecompiledFuncStr, depth, visitedDict, FuncData, functionsDict)
-with open("ghidra/bin/danger.json", "w") as outfile:
+with open(os.path.join(output_dir, "{}_danger.json".format(prog_name)), "w") as file:
     json_object = json.dumps(FuncData, indent=4)
-    outfile.write(json_object)
+    file.write(json_object)
 
